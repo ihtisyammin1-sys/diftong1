@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUNIA DIFTONG - Jom Kenali AI, AU dan OI!</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Lexend for child-friendly legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        lexend: ['Lexend', 'sans-serif'],
+                    },
+                    colors: {
+                        brandYellow: '#FFD166',
+                        brandRed: '#EF476F',
+                        brandBlue: '#118AB2',
+                        brandGreen: '#06D6A0',
+                        brandPurple: '#8338EC',
+                        brandOrange: '#FB5607'
+                    },
+                    boxShadow: {
+                        'fun': '0 8px 0px 0px rgba(0, 0, 0, 0.12)',
+                        'fun-lg': '0 12px 0px 0px rgba(0, 0, 0, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #FFFFFF;
+            color: #2B2D42;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        h1, h2, h3, h4, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* High Contrast Mode for Inclusive Accessibility */
+        body.high-contrast {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+        }
+        body.high-contrast .bg-white,
+        body.high-contrast .bg-gray-50,
+        body.high-contrast .bg-yellow-50,
+        body.high-contrast .bg-blue-50 {
+            background-color: #1a1a1a !important;
+            color: #FFFFFF !important;
+            border-color: #FFFF00 !important;
+        }
+
+        /* Custom Interactive Cursor Follower */
+        #cursor-follower {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #EF476F;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out, background-color 0.2s ease, width 0.2s ease, height 0.2s ease;
+            z-index: 9999;
+            background: rgba(239, 71, 111, 0.15);
+        }
+
+        /* Scroll reveal class */
+        .reveal {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Button hover and active bounce effect */
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        /* Confetti Canvas overlay */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9990;
+        }
+
+        /* Wheel of Fortune spinning style */
+        #uno-wheel {
+            transition: transform 4s cubic-bezier(0.15, 0.99, 0.24, 0.99);
+        }
+
+        /* Custom Audio Player Styling */
+        .audio-card {
+            background: #F8FAF9;
+            border: 3px solid #E2E8F0;
+            border-radius: 20px;
+        }
+
+        /* Recording Pulse Effect */
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-recording {
+            animation: pulse-red 1s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brandYellow selection:text-black">
+
+    <!-- Custom Cursor Visual Element -->
+    <div id="cursor-follower"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- HEADER / NAVIGATION -->
+    <header id="main-header" class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-4 border-yellow-300 shadow-sm transition-all duration-300 hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo & Mascot Title -->
+                <button onclick="navigasi('dashboard')" class="flex items-center gap-3 text-left focus:outline-none group">
+                    <div class="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center text-2xl shadow-fun border-2 border-black group-hover:rotate-6 transition-transform relative">
+                        🔴
+                        <span id="equipped-hat-badge" class="absolute -top-3 -right-2 text-xl"></span>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-bold tracking-wide text-brandRed font-fun leading-none">
+                            DUNIA DIFTONG
+                        </div>
+                        <div class="text-xs text-gray-500 font-medium">Jom Kenali AI, AU dan OI!</div>
+                    </div>
+                </button>
+
+                <!-- Navigation Controls & Stats Bar -->
+                <div class="flex items-center gap-2 sm:gap-4 font-bold text-sm sm:text-base">
+                    <!-- Mod Guru Button -->
+                    <button onclick="bukaModGuruModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3.5 py-2 rounded-2xl border-2 border-black shadow-fun btn-bounce flex items-center gap-2 text-xs sm:text-sm font-bold shrink-0">
+                        <span>👩‍🏫</span>
+                        <span>Mod Guru</span>
+                    </button>
+
+                    <div class="hidden md:flex items-center gap-1.5 bg-orange-100 border-2 border-orange-300 text-orange-700 px-3 py-1.5 rounded-full shadow-sm" title="Streak Kehadiran">
+                        <span>🔥</span>
+                        <span id="stat-streak">1</span> <span class="hidden sm:inline">Hari</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-yellow-100 border-2 border-yellow-300 text-yellow-800 px-3 py-1.5 rounded-full shadow-sm" title="Mata">
+                        <span>⭐</span>
+                        <span id="stat-mata">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-blue-100 border-2 border-blue-300 text-blue-800 px-3 py-1.5 rounded-full shadow-sm" title="Syiling">
+                        <span>🪙</span>
+                        <span id="stat-syiling">50</span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 bg-purple-100 border-2 border-purple-300 text-purple-800 px-3 py-1.5 rounded-full shadow-sm" title="Tiket">
+                        <span>🎟️</span>
+                        <span id="stat-tiket">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: HALAMAN SELAMAT DATANG -->
+    <section id="page-welcome" class="min-h-screen flex flex-col items-center justify-center p-4 relative bg-gradient-to-b from-yellow-50 via-white to-blue-50">
+        <!-- Decorative background shapes -->
+        <div class="absolute top-10 left-10 text-4xl opacity-30 animate-bounce">☁️</div>
+        <div class="absolute top-20 right-16 text-5xl opacity-30 animate-pulse">⭐</div>
+        <div class="absolute bottom-16 left-20 text-5xl opacity-30 animate-pulse">🎈</div>
+        <div class="absolute bottom-10 right-10 text-4xl opacity-30 animate-bounce">✨</div>
+
+        <div class="max-w-3xl w-full bg-white rounded-3xl p-6 sm:p-10 border-4 border-black shadow-fun-lg text-center relative z-10 my-auto">
+            
+            <!-- Mascot Title Header -->
+            <div class="inline-block bg-red-100 border-2 border-brandRed text-brandRed font-bold px-4 py-1 rounded-full text-sm mb-4 animate-pulse">
+                🔴 Hai ⚫ ran
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-6xl font-black text-brandRed mb-2 tracking-wide drop-shadow-md">
+                DUNIA DIFTONG
+            </h1>
+            <p class="text-xl sm:text-2xl font-bold text-brandBlue mb-6">
+                “Jom Kenali AI, AU dan OI!”
+            </p>
+
+            <!-- Mascot Illustration Placeholder -->
+            <div class="w-36 h-36 sm:w-44 sm:h-44 mx-auto bg-gradient-to-tr from-yellow-300 to-red-300 rounded-full border-4 border-black p-2 mb-6 flex items-center justify-center shadow-fun relative">
+                <div class="text-6xl sm:text-7xl">🐱</div>
+                <div id="mascot-welcome-hat" class="absolute -top-3 text-4xl"></div>
+            </div>
+
+            <p class="text-gray-700 font-medium text-base sm:text-lg mb-6 max-w-xl mx-auto">
+                Selamat datang ke Dunia Diftong! Mari belajar sambil bermain bersama watak <b>Hairan</b>.
+            </p>
+
+            <!-- Audio Player Section: selamatdatang.mp3 -->
+            <div class="audio-card p-4 sm:p-5 mb-8 max-w-md mx-auto text-left shadow-sm">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-2xl">🎵</span>
+                    <div>
+                        <h4 class="font-bold text-sm sm:text-base text-gray-800">Lagu Selamat Datang</h4>
+                        <p id="welcome-audio-status" class="text-xs text-gray-500">Audio laluan lalai atau rakaman guru.</p>
+                    </div>
+                </div>
+                
+                <!-- Audio Element -->
+                <audio id="audio-welcome" src="selamatdatang.mp3" preload="none"></audio>
+                
+                <!-- Custom Interactive Controls -->
+                <div class="flex items-center justify-between gap-1 sm:gap-2 mt-3 bg-white p-2 rounded-xl border border-gray-200 flex-wrap sm:flex-nowrap">
+                    <button onclick="playAudio('audio-welcome', 'Selamat datang ke Dunia Diftong! Mari belajar bunyi AI, AU dan OI bersama Hairan!', 'selamat_datang')" class="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+                        <i class="fas fa-play"></i> Main
+                    </button>
+                    <button onclick="pauseAudio('audio-welcome')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+                        <i class="fas fa-pause"></i> Jeda
+                    </button>
+                    <button onclick="stopAudio('audio-welcome')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+                        <i class="fas fa-stop"></i> Hentikan
+                    </button>
+                    <button onclick="restartAudio('audio-welcome')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm flex items-center gap-1">
+                        <i class="fas fa-redo"></i> Semula
+                    </button>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2 text-center">* Boleh dihentikan pada bila-bila masa.</p>
+            </div>
+
+            <!-- Start Button & Mod Guru Button -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="mulaMenjelajah()" class="w-full sm:w-auto bg-brandGreen hover:bg-emerald-400 text-white font-bold text-xl sm:text-2xl px-10 py-4 rounded-2xl border-4 border-black shadow-fun btn-bounce flex items-center justify-center gap-3">
+                    <span>🚀</span> Mula Menjelajah
+                </button>
+                <button onclick="bukaModGuruModal()" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg px-6 py-4 rounded-2xl border-4 border-black shadow-fun btn-bounce flex items-center justify-center gap-2">
+                    <span>👩‍🏫</span> Mod Guru
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: HALAMAN UTAMA / DASHBOARD -->
+    <section id="page-dashboard" class="max-w-7xl mx-auto px-4 py-8 w-full hidden">
+        
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun mb-10 flex flex-col md:flex-row items-center justify-between gap-6 reveal">
+            <div class="space-y-2 text-center md:text-left">
+                <span class="bg-white/80 text-black px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Tahap 1 • Bahasa Melayu</span>
+                <h2 class="text-3xl sm:text-5xl font-black text-black">
+                    Hai, Sahabat Diftong! 👋
+                </h2>
+                <p class="text-gray-800 font-medium text-base sm:text-lg">
+                    Pilih aktiviti menarik di bawah untuk mengumpul ⭐ Mata dan 🪙 Syiling hari ini!
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="navigasi('diftong-uno')" class="bg-brandRed text-white font-bold text-lg px-6 py-3 rounded-2xl border-2 border-black shadow-fun hover:bg-red-600 transition flex items-center justify-center gap-2 shrink-0 btn-bounce">
+                    <span>🎡</span> Main Diftong UNO!
+                </button>
+                <button onclick="bukaModGuruModal()" class="bg-purple-600 text-white font-bold text-lg px-6 py-3 rounded-2xl border-2 border-black shadow-fun hover:bg-purple-700 transition flex items-center justify-center gap-2 shrink-0 btn-bounce">
+                    <span>👩‍🏫</span> Mod Guru
+                </button>
+            </div>
+        </div>
+
+        <!-- MENU GRID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <!-- Card 1: Mula Bermain -->
+            <div onclick="navigasi('mod-biasa')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🎮
+                </div>
+                <h3 class="text-2xl font-bold text-brandBlue mb-2">Mula Bermain</h3>
+                <p class="text-gray-600 text-sm font-medium">5 Tahap cabaran interaktif (Kenali, Dengar, Padan & Cabaran).</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-brandBlue">
+                    <span>5 Tahap</span>
+                    <span class="bg-blue-100 px-3 py-1 rounded-full">Main Sekarang ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Mod Inklusif -->
+            <div onclick="navigasi('mod-inklusif')" class="bg-gradient-to-br from-yellow-100 to-green-100 rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-yellow-300 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🌈
+                </div>
+                <h3 class="text-2xl font-bold text-emerald-700 mb-2">Mod Inklusif</h3>
+                <p class="text-gray-700 text-sm font-medium">Pembelajaran khusus mesra sokongan visual & audio berpandu.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-emerald-800">
+                    <span>Sokongan Khas</span>
+                    <span class="bg-white px-3 py-1 rounded-full border border-black">Buka ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Diftong UNO -->
+            <div onclick="navigasi('diftong-uno')" class="bg-gradient-to-br from-red-100 to-purple-100 rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-brandRed text-white rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🃏
+                </div>
+                <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">Inovasi Utama</span>
+                <h3 class="text-2xl font-bold text-brandRed mt-1 mb-2">Diftong UNO</h3>
+                <p class="text-gray-700 text-sm font-medium">Pusing Roda Diftong, temui kad & sebut perkataan!</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-brandRed">
+                    <span>Roda & Kad</span>
+                    <span class="bg-white px-3 py-1 rounded-full border border-black">Pusing! ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Mod Guru (Pengurusan Audio) -->
+            <div onclick="bukaModGuruModal()" class="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    👩‍🏫
+                </div>
+                <span class="bg-purple-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">Ciri Guru</span>
+                <h3 class="text-2xl font-bold text-purple-900 mt-1 mb-2">Mod Guru</h3>
+                <p class="text-gray-700 text-sm font-medium">Rakam suara guru, muat naik fail audio & pengurusan sandaran.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-purple-900">
+                    <span>Audio Guru</span>
+                    <span class="bg-white px-3 py-1 rounded-full border border-black">Urus Audio ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 5: Nota Diftong -->
+            <div onclick="navigasi('nota')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    📚
+                </div>
+                <h3 class="text-2xl font-bold text-brandPurple mb-2">Nota Diftong</h3>
+                <p class="text-gray-600 text-sm font-medium">Penerangan audio & contoh perkataan AI, AU, OI.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-brandPurple">
+                    <span>Audio Nota</span>
+                    <span class="bg-purple-100 px-3 py-1 rounded-full">Baca ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 6: Video Pembelajaran -->
+            <div onclick="navigasi('video')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🎥
+                </div>
+                <h3 class="text-2xl font-bold text-red-600 mb-2">Video Pembelajaran</h3>
+                <p class="text-gray-600 text-sm font-medium">Tonton panduan sebutan & contoh multimedia.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-red-600">
+                    <span>Video HD</span>
+                    <span class="bg-red-100 px-3 py-1 rounded-full">Tonton ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 7: Misi Harian -->
+            <div onclick="navigasi('misi')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🎯
+                </div>
+                <h3 class="text-2xl font-bold text-yellow-700 mb-2">Misi Harian</h3>
+                <p class="text-gray-600 text-sm font-medium">Selesaikan cabaran hari ini untuk syiling ekstra!</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-yellow-700">
+                    <span>Ganjaran</span>
+                    <span class="bg-yellow-100 px-3 py-1 rounded-full">Semak ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 8: Koleksi / Galeri -->
+            <div onclick="navigasi('koleksi')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🎒
+                </div>
+                <h3 class="text-2xl font-bold text-emerald-700 mb-2">Koleksi Kad</h3>
+                <p class="text-gray-600 text-sm font-medium">Kumpul semua perkataan diftong yang ditemui.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-emerald-700">
+                    <span id="koleksi-counter">0/8 Kad</span>
+                    <span class="bg-emerald-100 px-3 py-1 rounded-full">Galeri ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 9: Kedai -->
+            <div onclick="navigasi('kedai')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🛍️
+                </div>
+                <h3 class="text-2xl font-bold text-pink-600 mb-2">Kedai Aksesori</h3>
+                <p class="text-gray-600 text-sm font-medium">Guna 🪙 Syiling untuk membeli hiasan avatar.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-pink-600">
+                    <span>Kosmetik</span>
+                    <span class="bg-pink-100 px-3 py-1 rounded-full">Beli ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 10: Ranking Kelas -->
+            <div onclick="navigasi('ranking')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    🏆
+                </div>
+                <h3 class="text-2xl font-bold text-amber-700 mb-2">Ranking Kelas</h3>
+                <p class="text-gray-600 text-sm font-medium">Lihat kedudukan mata peribadi dan kawan-kawan.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-amber-700">
+                    <span>Carta Skor</span>
+                    <span class="bg-amber-100 px-3 py-1 rounded-full">Lihat ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 11: Profil Saya -->
+            <div onclick="navigasi('profil')" class="bg-white rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform">
+                    👤
+                </div>
+                <h3 class="text-2xl font-bold text-indigo-700 mb-2">Profil Saya</h3>
+                <p class="text-gray-600 text-sm font-medium">Pencapaian, lencana khas dan statistik anda.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-indigo-700">
+                    <span>Profil</span>
+                    <span class="bg-indigo-100 px-3 py-1 rounded-full">Semak ➔</span>
+                </div>
+            </div>
+
+            <!-- Card 12: Pembelajaran Trialogikal -->
+            <div onclick="navigasi('trialogikal')" class="bg-gradient-to-br from-emerald-100 via-teal-100 to-green-100 rounded-3xl p-6 border-4 border-black shadow-fun hover:shadow-fun-lg transition cursor-pointer group btn-bounce reveal">
+                <div class="w-16 h-16 bg-emerald-400 text-white rounded-2xl flex items-center justify-center text-3xl mb-4 border-2 border-black group-hover:scale-110 transition-transform shadow-md">
+                    👩‍🏫
+                </div>
+                <span class="bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">Pedagogi Inovatif</span>
+                <h3 class="text-xl font-bold text-emerald-950 mt-1 mb-2">Baik, Cikgu!</h3>
+                <p class="text-gray-700 text-sm font-medium">Berdasarkan Pembelajaran Trialogikal & Pembinaan Objek Bersama.</p>
+                <div class="mt-4 flex items-center justify-between text-xs font-bold text-emerald-900">
+                    <span>Model Trialogikal</span>
+                    <span class="bg-white px-3 py-1 rounded-full border border-black shadow-sm">Buka ➔</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: MULA BERMAIN (5 TAHAP CABARAN) -->
+    <section id="page-mod-biasa" class="max-w-5xl mx-auto px-4 py-8 w-full hidden">
+        <div class="flex items-center justify-between mb-6">
+            <button onclick="navigasi('dashboard')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+                ← Utama
+            </button>
+            <div class="text-right">
+                <span id="game-level-badge" class="bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full text-sm">Tahap 1 dari 5</span>
+            </div>
+        </div>
+
+        <div id="game-container" class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun relative">
+            <!-- Dynamic Game Content loaded by JS -->
+        </div>
+    </section>
+
+    <!-- SECTION 4: MOD INKLUSIF -->
+    <section id="page-mod-inklusif" class="max-w-5xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-gradient-to-br from-yellow-50 to-emerald-50 rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-gray-200 pb-4">
+                <div>
+                    <h2 class="text-3xl font-black text-emerald-800">🌈 Mod Inklusif (Mesra Akses)</h2>
+                    <p class="text-sm text-gray-600">Disesuaikan untuk sokongan visual lebih jelas, sebutan diperlahankan, dan tulisan besar.</p>
+                </div>
+                <button onclick="toggleHighContrast()" class="bg-black text-yellow-300 font-bold px-4 py-2 rounded-xl border-2 border-yellow-300 text-xs sm:text-sm">
+                    ☯ High Contrast
+                </button>
+            </div>
+
+            <!-- Inclusive Soundboard Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border-4 border-blue-400 text-center shadow-md">
+                    <div class="text-5xl font-black text-blue-600 mb-2">ai</div>
+                    <p class="text-2xl font-bold text-gray-800 mb-4">Tupai 🐿️</p>
+                    <button onclick="sebutPerkataan('Tupai', 0.6)" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-lg">
+                        🔊 Dengar Sebutan (Perlahan)
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border-4 border-yellow-400 text-center shadow-md">
+                    <div class="text-5xl font-black text-yellow-600 mb-2">au</div>
+                    <p class="text-2xl font-bold text-gray-800 mb-4">Kerbau 🐃</p>
+                    <button onclick="sebutPerkataan('Kerbau', 0.6)" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-lg">
+                        🔊 Dengar Sebutan (Perlahan)
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border-4 border-pink-400 text-center shadow-md">
+                    <div class="text-5xl font-black text-pink-600 mb-2">oi</div>
+                    <p class="text-2xl font-bold text-gray-800 mb-4">Sepoi 🍃</p>
+                    <button onclick="sebutPerkataan('Sepoi', 0.6)" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-lg">
+                        🔊 Dengar Sebutan (Perlahan)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: DIFTONG UNO GAME -->
+    <section id="page-diftong-uno" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border-4 border-black shadow-fun text-center space-y-6 relative overflow-hidden">
+            <span class="bg-brandRed text-white font-bold text-xs px-3 py-1 rounded-full uppercase tracking-widest">Inovasi Utama</span>
+            <h2 class="text-3xl sm:text-5xl font-black text-brandRed">🎡 Roda Diftong UNO</h2>
+            <p class="text-gray-600 font-medium">Tekan butang **Pusing Roda** untuk menarik kad cabaran diftong anda!</p>
+
+            <!-- Wheel Visual Container -->
+            <div class="relative w-72 h-72 sm:w-80 sm:h-80 mx-auto my-6">
+                <!-- Pointer -->
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-4xl drop-shadow">🔻</div>
+                
+                <!-- Wheel SVG/Canvas -->
+                <div id="uno-wheel" class="w-full h-full rounded-full border-8 border-black shadow-fun overflow-hidden bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400 relative flex items-center justify-center">
+                    <div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+                        <div class="bg-red-400 border border-black/20 flex items-center justify-center text-white font-black text-2xl">AI</div>
+                        <div class="bg-blue-400 border border-black/20 flex items-center justify-center text-white font-black text-2xl">AU</div>
+                        <div class="bg-yellow-400 border border-black/20 flex items-center justify-center text-black font-black text-2xl">OI</div>
+                        <div class="bg-purple-400 border border-black/20 flex items-center justify-center text-white font-black text-2xl">WILD</div>
+                    </div>
+                    <!-- Center Pin -->
+                    <div class="w-16 h-16 bg-white border-4 border-black rounded-full z-10 flex items-center justify-center text-2xl font-bold shadow-md">
+                        🃏
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="pusingRodaUno()" id="btn-spin-uno" class="bg-brandRed hover:bg-red-600 text-white font-bold text-xl px-10 py-4 rounded-2xl border-4 border-black shadow-fun btn-bounce">
+                🎡 PUSING RODA!
+            </button>
+        </div>
+    </section>
+
+    <!-- SECTION 6: NOTA DIFTONG -->
+    <section id="page-nota" class="max-w-5xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border-4 border-black shadow-fun space-y-6">
+            <h2 class="text-3xl font-black text-brandPurple">📚 Nota Diftong (AI, AU, OI)</h2>
+            <p class="text-gray-600">Diftong ialah gabungan dua bunyi vokal yang disebut dalam satu hembusan nafas.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- AI -->
+                <div class="bg-red-50 p-5 rounded-2xl border-2 border-red-300 space-y-3">
+                    <div class="text-3xl font-black text-red-600">1. Diftong 'ai'</div>
+                    <p class="text-xs text-gray-600">Contoh Perkataan:</p>
+                    <div class="space-y-2">
+                        <button onclick="sebutPerkataan('Tupai')" class="w-full bg-white p-2 rounded-xl border border-red-200 font-bold flex justify-between items-center hover:bg-red-100">
+                            <span>Tu - pai 🐿️</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Gulai')" class="w-full bg-white p-2 rounded-xl border border-red-200 font-bold flex justify-between items-center hover:bg-red-100">
+                            <span>Gu - lai 🍲</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Kedai')" class="w-full bg-white p-2 rounded-xl border border-red-200 font-bold flex justify-between items-center hover:bg-red-100">
+                            <span>Ke - dai 🏪</span>
+                            <span>🔊</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AU -->
+                <div class="bg-blue-50 p-5 rounded-2xl border-2 border-blue-300 space-y-3">
+                    <div class="text-3xl font-black text-blue-600">2. Diftong 'au'</div>
+                    <p class="text-xs text-gray-600">Contoh Perkataan:</p>
+                    <div class="space-y-2">
+                        <button onclick="sebutPerkataan('Harimau')" class="w-full bg-white p-2 rounded-xl border border-blue-200 font-bold flex justify-between items-center hover:bg-blue-100">
+                            <span>Ha - ri - mau 🐯</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Kerbau')" class="w-full bg-white p-2 rounded-xl border border-blue-200 font-bold flex justify-between items-center hover:bg-blue-100">
+                            <span>Ker - bau 🐃</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Pisau')" class="w-full bg-white p-2 rounded-xl border border-blue-200 font-bold flex justify-between items-center hover:bg-blue-100">
+                            <span>Pi - sau 🔪</span>
+                            <span>🔊</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OI -->
+                <div class="bg-yellow-50 p-5 rounded-2xl border-2 border-yellow-300 space-y-3">
+                    <div class="text-3xl font-black text-yellow-600">3. Diftong 'oi'</div>
+                    <p class="text-xs text-gray-600">Contoh Perkataan:</p>
+                    <div class="space-y-2">
+                        <button onclick="sebutPerkataan('Amboi')" class="w-full bg-white p-2 rounded-xl border border-yellow-200 font-bold flex justify-between items-center hover:bg-yellow-100">
+                            <span>Am - boi 😲</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Sepoi')" class="w-full bg-white p-2 rounded-xl border border-yellow-200 font-bold flex justify-between items-center hover:bg-yellow-100">
+                            <span>Se - poi 🍃</span>
+                            <span>🔊</span>
+                        </button>
+                        <button onclick="sebutPerkataan('Kaloi')" class="w-full bg-white p-2 rounded-xl border border-yellow-200 font-bold flex justify-between items-center hover:bg-yellow-100">
+                            <span>Ka - loi 🐟</span>
+                            <span>🔊</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: VIDEO PEMBELAJARAN -->
+    <section id="page-video" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <h2 class="text-3xl font-black text-red-600">🎥 Video Pembelajaran Diftong</h2>
+
+            <!-- Video Frame Simulator -->
+            <div class="aspect-video bg-black rounded-2xl border-4 border-black overflow-hidden relative flex flex-col items-center justify-center text-white p-6 text-center shadow-inner">
+                <div class="text-6xl mb-4 animate-bounce">🎬</div>
+                <h3 class="text-2xl font-bold mb-2">Panduan Sebutan Diftong AI, AU & OI</h3>
+                <p class="text-sm text-gray-300 mb-6">Tonton dan sebut bersama-sama Cikgu Hairan!</p>
+                <button onclick="sebutPerkataan('Mari kita belajar diftong ai, au, dan oi bersama-sama!')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl border-2 border-white flex items-center gap-2">
+                    <i class="fas fa-play"></i> Mainkan Tutorial Audio HD
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 8: MISI HARIAN -->
+    <section id="page-misi" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <h2 class="text-3xl font-black text-yellow-700">🎯 Misi Harian</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-yellow-50 p-4 rounded-2xl border-2 border-yellow-300 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-gray-800">1. Selesaikan 1 Tahap Game</h4>
+                        <p class="text-xs text-gray-500">Ganjaran: +20 Syiling, +10 Mata</p>
+                    </div>
+                    <button onclick="tuntutMisi(1, 20, 10)" id="btn-misi-1" class="bg-green-500 text-white font-bold px-4 py-2 rounded-xl text-sm border-2 border-black">
+                        Tuntut
+                    </button>
+                </div>
+
+                <div class="bg-yellow-50 p-4 rounded-2xl border-2 border-yellow-300 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-gray-800">2. Pusing Roda Diftong UNO</h4>
+                        <p class="text-xs text-gray-500">Ganjaran: +15 Syiling, +5 Mata</p>
+                    </div>
+                    <button onclick="tuntutMisi(2, 15, 5)" id="btn-misi-2" class="bg-green-500 text-white font-bold px-4 py-2 rounded-xl text-sm border-2 border-black">
+                        Tuntut
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 9: KOLEKSI KAD -->
+    <section id="page-koleksi" class="max-w-5xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <h2 class="text-3xl font-black text-emerald-700">🎒 Galeri Koleksi Kad Diftong</h2>
+            <div id="koleksi-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Dynamically generated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 10: KEDAI KOSMETIK -->
+    <section id="page-kedai" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-3xl font-black text-pink-600">🛍️ Kedai Topi Hairan</h2>
+                <span class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-full border border-blue-300">
+                    🪙 Syiling Anda: <span id="kedai-syiling">50</span>
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <!-- Topi Detektif -->
+                <div class="bg-pink-50 p-5 rounded-2xl border-2 border-pink-300 text-center space-y-3">
+                    <div class="text-5xl">🕵️‍♂️</div>
+                    <h4 class="font-bold text-gray-800">Topi Detektif</h4>
+                    <p class="text-xs text-gray-500">Harga: 🪙 30 Syiling</p>
+                    <button onclick="beliAksesori('Topi Detektif', 30, '🕵️‍♂️')" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-xl border-2 border-black">
+                        Beli & Pakai
+                    </button>
+                </div>
+
+                <!-- Mahkota Raja -->
+                <div class="bg-pink-50 p-5 rounded-2xl border-2 border-pink-300 text-center space-y-3">
+                    <div class="text-5xl">👑</div>
+                    <h4 class="font-bold text-gray-800">Mahkota Raja</h4>
+                    <p class="text-xs text-gray-500">Harga: 🪙 50 Syiling</p>
+                    <button onclick="beliAksesori('Mahkota Raja', 50, '👑')" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-xl border-2 border-black">
+                        Beli & Pakai
+                    </button>
+                </div>
+
+                <!-- Cermin Mata Cool -->
+                <div class="bg-pink-50 p-5 rounded-2xl border-2 border-pink-300 text-center space-y-3">
+                    <div class="text-5xl">🕶️</div>
+                    <h4 class="font-bold text-gray-800">Cermin Mata Cool</h4>
+                    <p class="text-xs text-gray-500">Harga: 🪙 20 Syiling</p>
+                    <button onclick="beliAksesori('Cermin Mata Cool', 20, '🕶️')" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-xl border-2 border-black">
+                        Beli & Pakai
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 11: RANKING KELAS -->
+    <section id="page-ranking" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6">
+            <h2 class="text-3xl font-black text-amber-700">🏆 Ranking Carta Kelas</h2>
+            <div class="space-y-3">
+                <div class="bg-yellow-100 border-2 border-yellow-400 p-4 rounded-2xl flex items-center justify-between font-bold">
+                    <span>🥇 1. Ali (Juara Diftong)</span>
+                    <span class="text-yellow-900">⭐ 250 Mata</span>
+                </div>
+                <div class="bg-gray-100 border-2 border-gray-300 p-4 rounded-2xl flex items-center justify-between font-bold">
+                    <span>🥈 2. Siti</span>
+                    <span class="text-gray-700">⭐ 210 Mata</span>
+                </div>
+                <div class="bg-orange-100 border-2 border-orange-300 p-4 rounded-2xl flex items-center justify-between font-bold">
+                    <span>🥉 3. Anda (Sahabat Hairan)</span>
+                    <span id="ranking-user-score" class="text-orange-900">⭐ 0 Mata</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 12: PROFIL SAYA -->
+    <section id="page-profil" class="max-w-4xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-black shadow-fun space-y-6 text-center">
+            <div class="w-28 h-28 bg-yellow-300 rounded-full border-4 border-black mx-auto flex items-center justify-center text-5xl relative">
+                🐱
+                <span id="profil-hat" class="absolute -top-2"></span>
+            </div>
+            <h2 class="text-3xl font-black text-indigo-700">Profil Murid Sahabat Diftong</h2>
+            <p class="text-gray-500 font-medium">Tahap 1 • Sekolah Rendah</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center font-bold">
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+                    <p class="text-xs text-gray-500">Mata</p>
+                    <p id="profil-mata" class="text-2xl text-indigo-600">0</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+                    <p class="text-xs text-gray-500">Syiling</p>
+                    <p id="profil-syiling" class="text-2xl text-indigo-600">50</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+                    <p class="text-xs text-gray-500">Kad Unlocked</p>
+                    <p id="profil-kad" class="text-2xl text-indigo-600">0/8</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
+                    <p class="text-xs text-gray-500">Streak</p>
+                    <p id="profil-streak" class="text-2xl text-indigo-600">1 Hari</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 13: BAIK, CIKGU. BERDASARKAN PEMBELAJARAN TRIALOGIKAL -->
+    <section id="page-trialogikal" class="max-w-5xl mx-auto px-4 py-8 w-full hidden">
+        <button onclick="navigasi('dashboard')" class="mb-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl flex items-center gap-2 border-2 border-black shadow-sm">
+            ← Utama
+        </button>
+
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border-4 border-black shadow-fun space-y-8">
+            <!-- Header Section -->
+            <div class="bg-gradient-to-r from-emerald-400 via-teal-400 to-green-300 p-6 sm:p-8 rounded-2xl border-4 border-black text-black space-y-3 shadow-md">
+                <span class="bg-black text-yellow-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Pendekatan Pedagogi Moden</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-black leading-tight">
+                    Pembelajaran Trialogikal dalam Dunia Diftong
+                </h2>
+                <p class="text-sm sm:text-base font-semibold text-gray-900 max-w-3xl">
+                    Dunia Diftong selari dengan <b>Pembelajaran Trialogikal</b> kerana murid bukan sekadar menerima maklumat tentang diftong, tetapi berinteraksi, menyelesaikan cabaran, menghasilkan hasil pembelajaran dan membina pengetahuan melalui aktiviti bersama.
+                </p>
+            </div>
+
+            <!-- 8 Trialogical Points Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Point 1 -->
+                <div class="bg-emerald-50 p-6 rounded-2xl border-3 border-emerald-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">🤝</span>
+                        <h3 class="text-lg font-bold text-emerald-950">1. Kolaboratif dalam Pembelajaran</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Murid boleh belajar dan menjalankan aktiviti secara bersama melalui permainan serta aktiviti berkumpulan.</li>
+                        <li>Murid saling membantu dalam mengenal pasti dan menyebut diftong <b>ai</b>, <b>au</b> dan <b>oi</b>.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 2 -->
+                <div class="bg-teal-50 p-6 rounded-2xl border-3 border-teal-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">📦</span>
+                        <h3 class="text-lg font-bold text-teal-950">2. Membentuk Artifak Pengetahuan</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Murid menghasilkan dan mengumpul hasil pembelajaran seperti kad diftong, mata, lencana dan rekod kemajuan.</li>
+                        <li>Hasil tersebut menjadi artifak yang menunjukkan perkembangan penguasaan murid.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 3 -->
+                <div class="bg-blue-50 p-6 rounded-2xl border-3 border-blue-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">🧩</span>
+                        <h3 class="text-lg font-bold text-blue-950">3. Menyelesaikan Masalah</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Murid perlu menyelesaikan cabaran seperti memilih bunyi diftong yang betul, memadankan perkataan dan mengelaskan perkataan kepada <b>ai</b>, <b>au</b> atau <b>oi</b>.</li>
+                        <li>Murid boleh mencuba semula apabila melakukan kesilapan.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 4 -->
+                <div class="bg-yellow-50 p-6 rounded-2xl border-3 border-yellow-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">💡</span>
+                        <h3 class="text-lg font-bold text-yellow-950">4. Mencetuskan Idea Baharu</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Aktiviti permainan memberi peluang kepada murid meneroka pelbagai perkataan yang mengandungi diftong.</li>
+                        <li>Murid menggunakan pengetahuan yang diperoleh untuk membuat pilihan dan menjawab cabaran baharu.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 5 -->
+                <div class="bg-purple-50 p-6 rounded-2xl border-3 border-purple-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">💬</span>
+                        <h3 class="text-lg font-bold text-purple-950">5. Meningkatkan Kemahiran Interaksi Sosial</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Aktiviti permainan boleh dijalankan secara bersama antara murid perdana dan murid inklusif.</li>
+                        <li>Murid boleh berkomunikasi, memberi sokongan dan membantu rakan semasa menyelesaikan tugasan.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 6 -->
+                <div class="bg-orange-50 p-6 rounded-2xl border-3 border-orange-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">📋</span>
+                        <h3 class="text-lg font-bold text-orange-950">6. Mengorganisasi Usaha dan Aktiviti</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Murid mengikuti beberapa aktiviti yang tersusun seperti <b>lihat ➔ dengar ➔ pilih ➔ sebut</b>.</li>
+                        <li>Setiap aktiviti membawa murid ke arah pembinaan pengetahuan tentang bunyi dan sebutan diftong.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 7 -->
+                <div class="bg-pink-50 p-6 rounded-2xl border-3 border-pink-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">🎯</span>
+                        <h3 class="text-lg font-bold text-pink-950">7. Berpusatkan Murid</h3>
+                    </div>
+                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1.5 pl-1 font-medium">
+                        <li>Murid meneroka aktiviti mengikut kemampuan sendiri dan boleh mendengar semula audio serta mencuba semula.</li>
+                        <li>Ciri ini menyokong pembelajaran murid inklusif tanpa memisahkan mereka daripada pembelajaran bersama murid lain.</li>
+                    </ul>
+                </div>
+
+                <!-- Point 8 -->
+                <div class="bg-cyan-50 p-6 rounded-2xl border-3 border-cyan-400 space-y-2 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">🌐</span>
+                        <h3 class="text-lg font-bold text-cyan-950">8. Penghasilan Pengetahuan secara Bersama</h3>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+                        Dunia Diftong menjadi ruang pembelajaran yang membolehkan murid membina pengetahuan melalui interaksi dengan rakan, guru, bahan visual, audio dan permainan digital.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div class="bg-gradient-to-br from-green-100 to-emerald-100 p-6 rounded-2xl border-3 border-black text-center space-y-2 shadow-sm">
+                <p class="text-xs uppercase font-extrabold tracking-wider text-emerald-800">📌 Kesimpulan</p>
+                <p class="text-base sm:text-lg font-bold text-gray-900 leading-relaxed">
+                    Dunia Diftong selari dengan Pembelajaran Trialogikal kerana murid bukan sekadar menerima maklumat tentang diftong, tetapi berinteraksi, menyelesaikan cabaran, menghasilkan hasil pembelajaran dan membina pengetahuan melalui aktiviti bersama.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL MOD GURU: PENGURUSAN AUDIO RAKAMAN GURU -->
+    <div id="modal-mod-guru" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col border-4 border-black shadow-fun-lg overflow-hidden relative">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 text-white p-4 sm:p-6 border-b-4 border-black flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-yellow-400 text-black text-2xl rounded-2xl border-2 border-black flex items-center justify-center font-bold shadow-sm">
+                        👩‍🏫
+                    </div>
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-black font-fun tracking-wide">Pengurusan Audio Guru</h3>
+                        <p class="text-xs sm:text-sm text-purple-200 font-medium">Rakam suara sendiri, muat naik fail audio & urus sandaran sebutan.</p>
+                    </div>
+                </div>
+                <button onclick="tutupModGuruModal()" class="w-10 h-10 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl border-2 border-black flex items-center justify-center text-xl transition btn-bounce">
+                    ✖
+                </button>
+            </div>
+
+            <!-- Toolbar Sandaran (Export/Import/Reset) -->
+            <div class="bg-purple-50 p-3 sm:p-4 border-b-2 border-purple-200 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm shrink-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Export -->
+                    <button onclick="eksportSandaranAudio()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl border-2 border-black shadow-sm flex items-center gap-1.5 btn-bounce">
+                        <span>💾</span> Simpan Sandaran (Export)
+                    </button>
+                    <!-- Import -->
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-2 rounded-xl border-2 border-black shadow-sm flex items-center gap-1.5 cursor-pointer btn-bounce">
+                        <span>📂</span> Pulihkan Sandaran (Import)
+                        <input type="file" id="input-import-json" accept=".json" onchange="importSandaranAudio(event)" class="hidden">
+                    </label>
+                </div>
+                <!-- Delete All -->
+                <button onclick="sahkanPadamSemuaAudio()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-2 rounded-xl border-2 border-black shadow-sm flex items-center gap-1.5 btn-bounce">
+                    <span>🗑️</span> Padam Kesemua Audio
+                </button>
+            </div>
+
+            <!-- Notification Toast Message Inside Modal -->
+            <div id="guru-toast" class="hidden bg-yellow-100 border-b-2 border-yellow-300 text-yellow-900 px-4 py-2 text-xs sm:text-sm font-bold flex items-center justify-between">
+                <span id="guru-toast-text">Notifikasi</span>
+                <button onclick="tutupGuruToast()" class="text-yellow-800 font-extrabold text-sm">✕</button>
+            </div>
+
+            <!-- Scrollable List of Missions & Audio Items -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 bg-gray-50">
+                
+                <!-- MISI 1: DIFTONG AI -->
+                <div class="bg-white rounded-2xl border-3 border-red-300 p-4 sm:p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2 border-red-200">
+                        <h4 class="font-black text-lg text-red-600 font-fun flex items-center gap-2">
+                            <span>🍓</span> Misi 1: Kata & Sebutan Diftong AI
+                        </h4>
+                        <span class="text-xs bg-red-100 text-red-700 font-bold px-2.5 py-1 rounded-full">3 Item</span>
+                    </div>
+                    <div id="misi-1-container" class="space-y-3">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- MISI 2: DIFTONG AU -->
+                <div class="bg-white rounded-2xl border-3 border-blue-300 p-4 sm:p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2 border-blue-200">
+                        <h4 class="font-black text-lg text-blue-600 font-fun flex items-center gap-2">
+                            <span>🌊</span> Misi 2: Kata & Sebutan Diftong AU
+                        </h4>
+                        <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded-full">3 Item</span>
+                    </div>
+                    <div id="misi-2-container" class="space-y-3">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- MISI 3: DIFTONG OI -->
+                <div class="bg-white rounded-2xl border-3 border-yellow-400 p-4 sm:p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2 border-yellow-200">
+                        <h4 class="font-black text-lg text-yellow-700 font-fun flex items-center gap-2">
+                            <span>🍃</span> Misi 3: Kata & Sebutan Diftong OI
+                        </h4>
+                        <span class="text-xs bg-yellow-100 text-yellow-800 font-bold px-2.5 py-1 rounded-full">3 Item</span>
+                    </div>
+                    <div id="misi-3-container" class="space-y-3">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- MISI 4: MOD INKLUSIF (PERLAHAN) -->
+                <div class="bg-white rounded-2xl border-3 border-emerald-400 p-4 sm:p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2 border-emerald-200">
+                        <h4 class="font-black text-lg text-emerald-800 font-fun flex items-center gap-2">
+                            <span>🌈</span> Misi 4: Mod Inklusif (Sebutan Perlahan)
+                        </h4>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">3 Item</span>
+                    </div>
+                    <div id="misi-4-container" class="space-y-3">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- MISI 5: ARAHAN & SISTEM -->
+                <div class="bg-white rounded-2xl border-3 border-purple-400 p-4 sm:p-5 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2 border-purple-200">
+                        <h4 class="font-black text-lg text-purple-900 font-fun flex items-center gap-2">
+                            <span>🔔</span> Misi 5: Arahan & Sistem
+                        </h4>
+                        <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-1 rounded-full">3 Item</span>
+                    </div>
+                    <div id="misi-5-container" class="space-y-3">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-gray-100 p-4 border-t-2 border-gray-300 text-center shrink-0">
+                <button onclick="tutupModGuruModal()" class="bg-gray-800 hover:bg-black text-white font-bold px-8 py-2.5 rounded-xl border-2 border-black text-sm">
+                    Selesai & Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL UNTUK CABARAN KAD UNO -->
+    <div id="modal-uno-card" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full border-4 border-black shadow-fun-lg text-center space-y-4">
+            <div id="uno-card-bg" class="p-6 rounded-2xl border-4 border-black text-white space-y-3 transition-colors duration-300">
+                <span id="uno-card-type" class="text-xs uppercase font-bold bg-black/30 px-3 py-1 rounded-full tracking-wider">Kad Diftong</span>
+                <div id="uno-card-title" class="text-4xl sm:text-5xl font-black drop-shadow">AI</div>
+                
+                <!-- Visual Container -->
+                <div class="w-32 h-32 mx-auto bg-white rounded-2xl border-4 border-black flex items-center justify-center shadow-inner my-3 relative overflow-hidden">
+                    <span id="uno-card-visual" class="text-6xl animate-bounce">🐿️</span>
+                </div>
+
+                <p id="uno-card-word" class="text-2xl font-bold text-white drop-shadow">Tupai</p>
+            </div>
+            <p id="uno-card-desc" class="text-sm font-bold text-gray-700 bg-gray-100 p-3 rounded-xl border border-gray-300">Sebut perkataan di atas dengan lantang!</p>
+            <button onclick="tutupUnoModal()" class="w-full bg-brandGreen hover:bg-emerald-500 text-white font-bold py-3 rounded-xl border-2 border-black text-lg shadow-sm btn-bounce">
+                Tanda Selesai (+10 Syiling)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL PENGESAHAN PADAM SEMUA AUDIO -->
+    <div id="modal-sahkan-padam" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full border-4 border-black shadow-fun-lg text-center space-y-4">
+            <div class="text-5xl text-red-500">⚠️</div>
+            <h3 class="text-2xl font-bold text-gray-900">Padam Kesemua Audio?</h3>
+            <p class="text-xs text-gray-600 font-medium">Adakah anda pasti mahu memadam semua rakaman suara guru? Tindakan ini tidak boleh diundur.</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="padamSemuaAudioGuru()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl border-2 border-black text-sm">
+                    Ya, Padam Semua
+                </button>
+                <button onclick="tutupSahkanPadam()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2.5 rounded-xl border-2 border-black text-sm">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            streak: 1,
+            mata: 0,
+            syiling: 50,
+            tiket: 3,
+            currentLevel: 1,
+            equippedHat: '',
+            unlockedCards: ['tupai', 'harimau'],
+            dailyMissions: { 1: false, 2: false }
+        };
+
+        // Storage object for Teacher Recorded Audios (Key -> Base64 Audio URL)
+        let guruAudioStore = {};
+
+        // Active recording variables
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let activeRecordingKey = null;
+
+        // All Audio Items categorized by Mission
+        const GURU_AUDIO_CATALOG = {
+            misi1: [
+                { key: 'tupai', name: 'Tupai', emoji: '🐿️', desc: 'Diftong AI' },
+                { key: 'tikai', name: 'Tikai', emoji: '🪵', desc: 'Diftong AI' },
+                { key: 'gulai', name: 'Gulai', emoji: '🍲', desc: 'Diftong AI' }
+            ],
+            misi2: [
+                { key: 'kerbau', name: 'Kerbau', emoji: '🐃', desc: 'Diftong AU' },
+                { key: 'pulau', name: 'Pulau', emoji: '🏝️', desc: 'Diftong AU' },
+                { key: 'surau', name: 'Surau', emoji: '🕌', desc: 'Diftong AU' }
+            ],
+            misi3: [
+                { key: 'sepoi', name: 'Sepoi', emoji: '🍃', desc: 'Diftong OI' },
+                { key: 'amboi', name: 'Amboi', emoji: '😲', desc: 'Diftong OI' },
+                { key: 'kaloi', name: 'Kaloi', emoji: '🐟', desc: 'Diftong OI' }
+            ],
+            misi4: [
+                { key: 'tupai_perlahan', name: 'Tupai (Perlahan)', emoji: '🐿️', desc: 'Mod Inklusif' },
+                { key: 'kerbau_perlahan', name: 'Kerbau (Perlahan)', emoji: '🐃', desc: 'Mod Inklusif' },
+                { key: 'sepoi_perlahan', name: 'Sepoi (Perlahan)', emoji: '🍃', desc: 'Mod Inklusif' }
+            ],
+            misi5: [
+                { key: 'selamat_datang', name: 'Ucapan Selamat Datang', emoji: '🙋‍♂️', desc: 'Sistem Audio Welcome' },
+                { key: 'betul', name: 'Jawapan Betul', emoji: '🎉', desc: 'Maklum Balas Positif' },
+                { key: 'salah', name: 'Jawapan Salah', emoji: '💡', desc: 'Maklum Balas Cuba Lagi' }
+            ]
+        };
+
+        // All 8 Diftong Words for Collection
+        const ALL_CARDS = [
+            { id: 'tupai', title: 'Tupai', diftong: 'ai', emoji: '🐿' },
+            { id: 'harimau', title: 'Harimau', diftong: 'au', emoji: '🐯' },
+            { id: 'sepoi', title: 'Sepoi', diftong: 'oi', emoji: '🍃' },
+            { id: 'kerbau', title: 'Kerbau', diftong: 'au', emoji: '🐃' },
+            { id: 'gulai', title: 'Gulai', diftong: 'ai', emoji: '🍲' },
+            { id: 'kaloi', title: 'Kaloi', diftong: 'oi', emoji: '🐟' },
+            { id: 'kedai', title: 'Kedai', diftong: 'ai', emoji: '🏪' },
+            { id: 'pisau', title: 'Pisau', diftong: 'au', emoji: '🔪' }
+        ];
+
+        let currentActiveAudioObj = null;
+
+        // Smart Speech Function: Prefers Teacher Audio -> Falls back to Web Speech API
+        function sebutPerkataan(teks, rate = 0.9) {
+            let key = teks.toLowerCase().trim().replace(/[^a-z0-9_]/g, '');
+
+            // In slow mode (rate <= 0.7), check if a slow recording exists
+            if (rate <= 0.7 && guruAudioStore[key + '_perlahan']) {
+                key = key + '_perlahan';
+            }
+
+            // Stop any currently playing audio
+            hentikanSemuaAudio();
+
+            // Check if teacher audio exists
+            if (guruAudioStore[key]) {
+                try {
+                    currentActiveAudioObj = new Audio(guruAudioStore[key]);
+                    currentActiveAudioObj.playbackRate = rate > 0.8 ? 1.0 : rate;
+                    currentActiveAudioObj.play().catch(() => {
+                        fallbackSpeechSynthesis(teks, rate);
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('Gagal memainkan audio guru, menggunakan suara sintetik:', e);
+                }
+            }
+
+            // Fallback: Web Speech API
+            fallbackSpeechSynthesis(teks, rate);
+        }
+
+        function fallbackSpeechSynthesis(teks, rate = 0.9) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(teks);
+                utterance.lang = 'ms-MY';
+                utterance.rate = rate;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playAudio(id, fallbackText, customKey) {
+            hentikanSemuaAudio();
+
+            // Check if teacher audio exists for this action
+            if (customKey && guruAudioStore[customKey]) {
+                try {
+                    currentActiveAudioObj = new Audio(guruAudioStore[customKey]);
+                    currentActiveAudioObj.play();
+                    return;
+                } catch (e) {
+                    console.warn('Audio guru gagal:', e);
+                }
+            }
+
+            const audio = document.getElementById(id);
+            if (audio && audio.src && !audio.src.endsWith('.mp3')) {
+                audio.play().catch(() => {
+                    sebutPerkataan(fallbackText);
+                });
+            } else {
+                sebutPerkataan(fallbackText);
+            }
+        }
+
+        function pauseAudio(id) {
+            const audio = document.getElementById(id);
+            if (audio) audio.pause();
+            if (currentActiveAudioObj) currentActiveAudioObj.pause();
+            if ('speechSynthesis' in window) window.speechSynthesis.pause();
+        }
+
+        function stopAudio(id) {
+            const audio = document.getElementById(id);
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            hentikanSemuaAudio();
+        }
+
+        function restartAudio(id) {
+            stopAudio(id);
+            playAudio(id, 'Selamat datang ke Dunia Diftong!', 'selamat_datang');
+        }
+
+        function hentikanSemuaAudio() {
+            if (currentActiveAudioObj) {
+                currentActiveAudioObj.pause();
+                currentActiveAudioObj.currentTime = 0;
+                currentActiveAudioObj = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        async function mulaRakamAudio(key) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                paparGuruToast('⚠️ Pelayar anda tidak menyokong fungsi rakaman mikrofon.');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                activeRecordingKey = key;
+
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        guruAudioStore[key] = reader.result;
+                        simpanGuruAudioStore();
+                        kemaskiniModGuruUI();
+                        paparGuruToast(`✓ Audio untuk "${key}" berjaya dirakam & disimpan!`);
+                    };
+                    reader.readAsDataURL(audioBlob);
+
+                    // Turn off microphone track
+                    stream.getTracks().forEach(track => track.stop());
+                    activeRecordingKey = null;
+                    kemaskiniModGuruUI();
+                };
+
+                mediaRecorder.start();
+                kemaskiniModGuruUI();
+                paparGuruToast(`🎙 RAKAMAN BERMULA: Sila sebut sekarang...`);
+
+            } catch (err) {
+                paparGuruToast('⚠️ Ralat mikrofon: Sila benarkan akses mikrofon pada peranti anda.');
+            }
+        }
+
+        function hentiRakamAudio() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        }
+
+        function muatNaikAudioFail(key, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                paparGuruToast('⚠️ Saiz fail terlalu besar! Sila pilih fail kurang daripada 5MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                guruAudioStore[key] = e.target.result;
+                simpanGuruAudioStore();
+                kemaskiniModGuruUI();
+                paparGuruToast(`✓ Fail audio untuk "${key}" berjaya dimuat naik!`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function padamAudioItem(key) {
+            if (guruAudioStore[key]) {
+                delete guruAudioStore[key];
+                simpanGuruAudioStore();
+                kemaskiniModGuruUI();
+                paparGuruToast(`🗑 Audio "${key}" telah dipadam.`);
+            }
+        }
+
+        function eksportSandaranAudio() {
+            const keysCount = Object.keys(guruAudioStore).length;
+            if (keysCount === 0) {
+                paparGuruToast('⚠️ Tiada audio rakaman guru untuk dieksport.');
+                return;
+            }
+
+            const dataStr = JSON.stringify(guruAudioStore, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const date = new Date().toISOString().slice(0, 10);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Sandaran_Audio_Dunia_Diftong_${date}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            paparGuruToast('💾 Fail sandaran audio berjaya dimuat turun!');
+        }
+
+        function importSandaranAudio(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (typeof data === 'object' && data !== null) {
+                        guruAudioStore = { ...guruAudioStore, ...data };
+                        simpanGuruAudioStore();
+                        kemaskiniModGuruUI();
+                        paparGuruToast('📂 Sandaran audio berjaya dipulihkan!');
+                    } else {
+                        throw new Error('Format salah');
+                    }
+                } catch (err) {
+                    paparGuruToast('⚠️ Gagal memulihkan. Fail JSON tidak sah.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function sahkanPadamSemua() {
+            document.getElementById('modal-sahkan-padam').classList.remove('hidden');
+        }
+
+        function tutupSahkanPadam() {
+            document.getElementById('modal-sahkan-padam').classList.add('hidden');
+        }
+
+        function sahkanPadamSemuaAudio() {
+            sahkanPadamSemua();
+        }
+
+        function padamSemuaAudioGuru() {
+            guruAudioStore = {};
+            simpanGuruAudioStore();
+            tutupSahkanPadam();
+            kemaskiniModGuruUI();
+            paparGuruToast('🗑 Semua audio rakaman guru telah dipadam.');
+        }
+
+        function simpanGuruAudioStore() {
+            try {
+                localStorage.setItem('dunia_diftong_guru_audio', JSON.stringify(guruAudioStore));
+            } catch (e) {
+                paparGuruToast('⚠️ Storan penuh! Sila eksport sandaran dan bersihkan fail.');
+            }
+        }
+
+        function muatGuruAudioStore() {
+            const saved = localStorage.getItem('dunia_diftong_guru_audio');
+            if (saved) {
+                try {
+                    guruAudioStore = JSON.parse(saved);
+                } catch (e) {
+                    guruAudioStore = {};
+                }
+            }
+        }
+
+        function kemaskiniModGuruUI() {
+            ['misi1', 'misi2', 'misi3', 'misi4', 'misi5'].forEach(misiKey => {
+                const container = document.getElementById(`${misiKey.replace('misi', 'misi-')}-container`);
+                if (!container) return;
+
+                const items = GURU_AUDIO_CATALOG[misiKey];
+                container.innerHTML = '';
+
+                items.forEach(item => {
+                    const hasAudio = !!guruAudioStore[item.key];
+                    const isRecording = (activeRecordingKey === item.key);
+
+                    const card = document.createElement('div');
+                    card.className = `bg-gray-50 border-2 ${hasAudio ? 'border-green-400 bg-green-50/30' : 'border-gray-200'} rounded-xl p-3 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3`;
+                    
+                    card.innerHTML = `
+                        <!-- Item Information -->
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl bg-white p-2 rounded-xl border border-gray-200 shadow-sm">${item.emoji}</span>
+                            <div>
+                                <h5 class="font-bold text-gray-800 text-base flex items-center gap-2">
+                                    ${item.name}
+                                    ${hasAudio 
+                                        ? '<span class="text-xs bg-green-100 border border-green-300 text-green-800 font-bold px-2 py-0.5 rounded-full">✓ Audio sedia</span>' 
+                                        : '<span class="text-xs bg-amber-100 border border-amber-300 text-amber-800 font-bold px-2 py-0.5 rounded-full">⚠️ Belum dirakam</span>'}
+                                    ${isRecording ? '<span class="text-xs bg-red-500 text-white font-bold px-2 py-0.5 rounded-full animate-recording">🔴 MERAKAM...</span>' : ''}
+                                </h5>
+                                <p class="text-xs text-gray-500 font-medium">Kod: <code class="bg-gray-200 px-1 rounded">${item.key}</code> • ${item.desc}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Controls -->
+                        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full md:w-auto justify-end">
+                            ${!isRecording ? `
+                                <button onclick="mulaRakamAudio('${item.key}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 border border-black/20 shadow-sm">
+                                    🎙️ Rakam
+                                </button>
+                            ` : `
+                                <button onclick="hentiRakamAudio()" class="bg-gray-900 hover:bg-black text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 border border-black animate-bounce shadow-sm">
+                                    ⏹️ Berhenti
+                                </button>
+                            `}
+
+                            ${hasAudio ? `
+                                <button onclick="sebutPerkataan('${item.name}')" class="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 border border-black/20 shadow-sm">
+                                    ▶️️ Dengar
+                                </button>
+                            ` : ''}
+
+                            <!-- Upload Button -->
+                            <label class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 border border-black/20 cursor-pointer shadow-sm">
+                                ⬆️ Muat Naik
+                                <input type="file" accept="audio/*" onchange="muatNaikAudioFail('${item.key}', this)" class="hidden">
+                            </label>
+
+                            ${hasAudio ? `
+                                <button onclick="padamAudioItem('${item.key}')" class="bg-gray-200 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg text-xs border border-gray-300 shadow-sm" title="Padam Audio">
+                                    🗑️
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function paparGuruToast(mesej) {
+            const toast = document.getElementById('guru-toast');
+            const text = document.getElementById('guru-toast-text');
+            if (toast && text) {
+                text.innerText = mesej;
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4000);
+            }
+        }
+
+        function tutupGuruToast() {
+            document.getElementById('guru-toast').classList.add('hidden');
+        }
+
+        function bukaModGuruModal() {
+            kemaskiniModGuruUI();
+            document.getElementById('modal-mod-guru').classList.remove('hidden');
+        }
+
+        function tutupModGuruModal() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            document.getElementById('modal-mod-guru').classList.add('hidden');
+        }
+
+        function navigasi(pageId) {
+            const pages = [
+                'page-welcome', 'page-dashboard', 'page-latar-belakang',
+                'page-mod-biasa', 'page-mod-inklusif', 'page-diftong-uno',
+                'page-nota', 'page-video', 'page-misi', 'page-koleksi',
+                'page-kedai', 'page-ranking', 'page-profil', 'page-bantuan', 'page-game-lain',
+                'page-trialogikal'
+            ];
+
+            pages.forEach(p => {
+                const el = document.getElementById(p);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById('page-' + pageId) || document.getElementById(pageId);
+            if (target) {
+                target.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            const header = document.getElementById('main-header');
+            if (pageId === 'welcome' || pageId === 'page-welcome') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+
+            kemaskiniStatUI();
+            if (pageId === 'koleksi') binaKoleksiUI();
+        }
+
+        function mulaMenjelajah() {
+            stopAudio('audio-welcome');
+            navigasi('dashboard');
+        }
+
+        function kemaskiniStatUI() {
+            document.getElementById('stat-streak').innerText = gameState.streak;
+            document.getElementById('stat-mata').innerText = gameState.mata;
+            document.getElementById('stat-syiling').innerText = gameState.syiling;
+            document.getElementById('stat-tiket').innerText = gameState.tiket;
+            
+            document.getElementById('kedai-syiling').innerText = gameState.syiling;
+            document.getElementById('ranking-user-score').innerText = '⭐ ' + gameState.mata + ' Mata';
+
+            document.getElementById('profil-mata').innerText = gameState.mata;
+            document.getElementById('profil-syiling').innerText = gameState.syiling;
+            document.getElementById('profil-kad').innerText = gameState.unlockedCards.length + '/8';
+            document.getElementById('profil-streak').innerText = gameState.streak + ' Hari';
+
+            document.getElementById('koleksi-counter').innerText = gameState.unlockedCards.length + '/8 Kad';
+            document.getElementById('equipped-hat-badge').innerText = gameState.equippedHat;
+            document.getElementById('mascot-welcome-hat').innerText = gameState.equippedHat;
+            document.getElementById('profil-hat').innerText = gameState.equippedHat;
+        }
+
+        function loadGameLevel(lvl) {
+            gameState.currentLevel = lvl;
+            const container = document.getElementById('game-container');
+            document.getElementById('game-level-badge').innerText = `Tahap ${lvl} dari 5`;
+
+            if (lvl === 1) {
+                container.innerHTML = `
+                    <h3 class="text-2xl font-bold text-brandBlue mb-4">Tahap 1: Kenali Bunyi Diftong</h3>
+                    <p class="text-gray-600 mb-6">Manakah antara perkataan berikut yang mengandungi diftong <b>'ai'</b>?</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="jawabSoalan(true, 'Tupai')" class="bg-blue-50 hover:bg-blue-100 border-2 border-blue-400 p-6 rounded-2xl text-2xl font-bold flex flex-col items-center gap-2">
+                            <span>Tupai 🐿️</span>
+                            <span onclick="event.stopPropagation(); sebutPerkataan('Tupai');" class="text-xs bg-blue-200 hover:bg-blue-300 px-3 py-1 rounded-full text-blue-800">🔊 Sebut</span>
+                        </button>
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-300 p-6 rounded-2xl text-2xl font-bold flex flex-col items-center gap-2">
+                            <span>Kucing 🐱</span>
+                            <span onclick="event.stopPropagation(); sebutPerkataan('Kucing');" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-gray-800">🔊 Sebut</span>
+                        </button>
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 hover:bg-gray-100 border-2 border-gray-300 p-6 rounded-2xl text-2xl font-bold flex flex-col items-center gap-2">
+                            <span>Ayam 🐓</span>
+                            <span onclick="event.stopPropagation(); sebutPerkataan('Ayam');" class="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-gray-800">🔊 Sebut</span>
+                        </button>
+                    </div>
+                `;
+            } else if (lvl === 2) {
+                container.innerHTML = `
+                    <h3 class="text-2xl font-bold text-brandBlue mb-4">Tahap 2: Dengar & Pilih</h3>
+                    <p class="text-gray-600 mb-4">Tekan butang di bawah untuk mendengar bunyi, kemudian pilih perkataan yang betul.</p>
+                    <button onclick="sebutPerkataan('Kerbau')" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-3 rounded-xl mb-6 flex items-center gap-2 mx-auto shadow-sm btn-bounce">
+                        🔊 Mainkan Sebutan Audio
+                    </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 border-2 border-gray-300 p-6 rounded-2xl text-2xl font-bold">Gulai 🍲</button>
+                        <button onclick="jawabSoalan(true, 'Kerbau')" class="bg-blue-50 border-2 border-blue-400 p-6 rounded-2xl text-2xl font-bold">Kerbau 🐃</button>
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 border-2 border-gray-300 p-6 rounded-2xl text-2xl font-bold">Sepoi 🍃</button>
+                    </div>
+                `;
+            } else if (lvl === 3) {
+                container.innerHTML = `
+                    <h3 class="text-2xl font-bold text-brandBlue mb-4">Tahap 3: Isi Tempat Kosong</h3>
+                    <p class="text-gray-600 mb-6">Isikan vokal diftong bagi perkataan: <b>Se - p _ _</b> (🍃 Wind)</p>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 border-2 border-gray-300 p-6 rounded-2xl text-3xl font-bold">ai</button>
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 border-2 border-gray-300 p-6 rounded-2xl text-3xl font-bold">au</button>
+                        <button onclick="jawabSoalan(true, 'Sepoi')" class="bg-pink-50 border-2 border-pink-400 p-6 rounded-2xl text-3xl font-bold text-pink-600">oi</button>
+                    </div>
+                `;
+            } else if (lvl === 4) {
+                container.innerHTML = `
+                    <h3 class="text-2xl font-bold text-brandBlue mb-4">Tahap 4: Padanan Diftong</h3>
+                    <p class="text-gray-600 mb-6">Pilih gambar yang sesuai dengan diftong <b>'au'</b>:</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <button onclick="jawabSoalan(true, 'Kerbau')" class="bg-yellow-50 border-2 border-yellow-400 p-6 rounded-2xl text-xl font-bold">Kerbau 🐃</button>
+                        <button onclick="jawabSoalan(false)" class="bg-gray-50 border-2 border-gray-300 p-6 rounded-2xl text-xl font-bold">Kedai 🏪</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center space-y-4">
+                        <div class="text-6xl animate-bounce">🎉</div>
+                        <h3 class="text-3xl font-black text-brandGreen">Tahniah! Semua Tahap Selesai!</h3>
+                        <p class="text-gray-600">Anda telah mendapat +50 Mata & +30 Syiling!</p>
+                        <button onclick="loadGameLevel(1)" class="bg-brandBlue text-white font-bold px-8 py-3 rounded-2xl border-2 border-black btn-bounce">
+                            Main Semula Tahap 1
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function jawabSoalan(betul, cardRewardId) {
+            if (betul) {
+                gameState.mata += 20;
+                gameState.syiling += 10;
+                lancarConfetti();
+                
+                if (cardRewardId && !gameState.unlockedCards.includes(cardRewardId.toLowerCase())) {
+                    gameState.unlockedCards.push(cardRewardId.toLowerCase());
+                }
+
+                // Play custom feedback audio if recorded, or fallback
+                if (guruAudioStore['betul']) {
+                    sebutPerkataan('betul');
+                } else {
+                    sebutPerkataan("Tahniah! Jawapan anda betul!");
+                }
+
+                kemaskiniStatUI();
+                setTimeout(() => loadGameLevel(gameState.currentLevel + 1), 1200);
+            } else {
+                if (guruAudioStore['salah']) {
+                    sebutPerkataan('salah');
+                } else {
+                    sebutPerkataan("Cuba lagi ya!");
+                }
+            }
+        }
+
+        let unoRotation = 0;
+        function pusingRodaUno() {
+            const wheel = document.getElementById('uno-wheel');
+            const btn = document.getElementById('btn-spin-uno');
+            if (btn) btn.disabled = true;
+
+            const sectors = [
+                {
+                    type: 'AI',
+                    title: 'DIFTONG AI',
+                    bgColor: 'bg-red-500',
+                    angleOffset: 45,
+                    words: [
+                        { name: 'Tupai', emoji: '🐿️', desc: 'Sebut "Tu - pai" dengan jelas!' },
+                        { name: 'Gulai', emoji: '🍲', desc: 'Sebut "Gu - lai" dengan jelas!' },
+                        { name: 'Kedai', emoji: '🏪', desc: 'Sebut "Ke - dai" dengan jelas!' }
+                    ]
+                },
+                {
+                    type: 'AU',
+                    title: 'DIFTONG AU',
+                    bgColor: 'bg-blue-500',
+                    angleOffset: 315,
+                    words: [
+                        { name: 'Kerbau', emoji: '🐃', desc: 'Sebut "Ker - bau" dengan jelas!' },
+                        { name: 'Pulau', emoji: '🏝️', desc: 'Sebut "Pu - lau" dengan jelas!' },
+                        { name: 'Surau', emoji: '🕌', desc: 'Sebut "Su - rau" dengan jelas!' }
+                    ]
+                },
+                {
+                    type: 'OI',
+                    title: 'DIFTONG OI',
+                    bgColor: 'bg-amber-500',
+                    angleOffset: 135,
+                    words: [
+                        { name: 'Sepoi', emoji: '🍃', desc: 'Sebut "Se - poi" dengan jelas!' },
+                        { name: 'Amboi', emoji: '😲', desc: 'Sebut "Am - boi" dengan jelas!' },
+                        { name: 'Kaloi', emoji: '🐟', desc: 'Sebut "Ka - loi" dengan jelas!' }
+                    ]
+                },
+                {
+                    type: 'WILD',
+                    title: 'KAD WILD (BEBAS)',
+                    bgColor: 'bg-purple-600',
+                    angleOffset: 225,
+                    words: [
+                        { name: 'Bebas Pilih!', emoji: '🌈', desc: 'Pilih dan sebut mana-mana perkataan diftong pilihan anda!' }
+                    ]
+                }
+            ];
+
+            const selectedSector = sectors[Math.floor(Math.random() * sectors.length)];
+            const selectedWord = selectedSector.words[Math.floor(Math.random() * selectedSector.words.length)];
+
+            const currentMod = unoRotation % 360;
+            const extraSpin = 360 * 5;
+            let targetMod = selectedSector.angleOffset;
+            let diff = targetMod - currentMod;
+            if (diff <= 0) diff += 360;
+
+            unoRotation += extraSpin + diff;
+            wheel.style.transform = `rotate(${unoRotation}deg)`;
+
+            setTimeout(() => {
+                if (btn) btn.disabled = false;
+
+                const cardBg = document.getElementById('uno-card-bg');
+                cardBg.className = `p-6 rounded-2xl border-4 border-black text-white space-y-3 transition-colors duration-300 ${selectedSector.bgColor}`;
+
+                document.getElementById('uno-card-type').innerText = selectedSector.type === 'WILD' ? 'KAD ISTIMEWA' : 'KAD DIFTONG';
+                document.getElementById('uno-card-title').innerText = selectedSector.title;
+                document.getElementById('uno-card-visual').innerText = selectedWord.emoji;
+                document.getElementById('uno-card-word').innerText = selectedWord.name;
+                document.getElementById('uno-card-desc').innerText = selectedWord.desc;
+
+                document.getElementById('modal-uno-card').classList.remove('hidden');
+                sebutPerkataan(selectedWord.name);
+            }, 4000);
+        }
+
+        function tutupUnoModal() {
+            document.getElementById('modal-uno-card').classList.add('hidden');
+            gameState.syiling += 10;
+            gameState.mata += 5;
+            lancarConfetti();
+            kemaskiniStatUI();
+        }
+
+        function binaKoleksiUI() {
+            const grid = document.getElementById('koleksi-grid');
+            grid.innerHTML = '';
+
+            ALL_CARDS.forEach(card => {
+                const unlocked = gameState.unlockedCards.includes(card.id);
+                const cardEl = document.createElement('div');
+                cardEl.className = `p-4 rounded-2xl border-4 text-center cursor-pointer ${unlocked ? 'bg-emerald-50 border-emerald-400' : 'bg-gray-100 border-gray-300 opacity-60'}`;
+                cardEl.onclick = () => { if (unlocked) sebutPerkataan(card.title); };
+                cardEl.innerHTML = `
+                    <div class="text-4xl mb-2">${unlocked ? card.emoji : '🔒'}</div>
+                    <h4 class="font-bold text-gray-800">${unlocked ? card.title : 'Terkunci'}</h4>
+                    <span class="text-xs font-bold text-gray-500 uppercase">${card.diftong}</span>
+                `;
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function beliAksesori(nama, harga, emoji) {
+            if (gameState.syiling >= harga) {
+                gameState.syiling -= harga;
+                gameState.equippedHat = emoji;
+                lancarConfetti();
+                kemaskiniStatUI();
+                sebutPerkataan('Topi dipakai!');
+            } else {
+                sebutPerkataan('Syiling anda tidak mencukupi!');
+            }
+        }
+
+        function tuntutMisi(id, syiling, mata) {
+            if (!gameState.dailyMissions[id]) {
+                gameState.dailyMissions[id] = true;
+                gameState.syiling += syiling;
+                gameState.mata += mata;
+                const btn = document.getElementById('btn-misi-' + id);
+                btn.innerText = 'Selesai ✓';
+                btn.classList.replace('bg-green-500', 'bg-gray-400');
+                btn.disabled = true;
+                lancarConfetti();
+                kemaskiniStatUI();
+            }
+        }
+
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        function lancarConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = Array.from({ length: 50 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                color: ['#FFD166', '#EF476F', '#118AB2', '#06D6A0'][Math.floor(Math.random() * 4)],
+                size: Math.random() * 8 + 4,
+                speedY: Math.random() * 5 + 2
+            }));
+
+            let frame = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+                frame++;
+                if (frame < 80) requestAnimationFrame(animate);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            animate();
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const follower = document.getElementById('cursor-follower');
+            if (follower) {
+                follower.style.left = e.clientX + 'px';
+                follower.style.top = e.clientY + 'px';
+            }
+        });
+
+        window.onload = function() {
+            muatGuruAudioStore();
+            loadGameLevel(1);
+            kemaskiniStatUI();
+        };
+    </script>
+</body>
+</html>
