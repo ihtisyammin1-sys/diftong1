@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUNIA DIFTONG - Laman Pembelajaran Interaktif Bahasa Melayu</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Quicksand for playful primary school look -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for rewards celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- SheetJS (XLSX) library for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandYellow: '#FFD166',
+                        brandOrange: '#FF9F1C',
+                        brandPink: '#FF70A6',
+                        brandBlue: '#4CC9F0',
+                        brandGreen: '#06D6A0',
+                        brandPurple: '#7209B7',
+                        bgSoft: '#F8F9FA'
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 100%);
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Floating animation for mascot and items */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Bounce soft */
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-soft {
+            animation: bounceSoft 2s infinite;
+        }
+
+        /* Pulse glow */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 159, 28, 0.5); }
+            50% { box-shadow: 0 0 28px rgba(255, 159, 28, 0.9); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2.5s infinite;
+        }
+
+        /* Custom scrollbar for game panels */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF9F1C;
+            border-radius: 10px;
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        /* Star Sparkle effect */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: fadeSparkle 1s forwards ease-out;
+        }
+        @keyframes fadeSparkle {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1.5) rotate(180deg); opacity: 0; }
+        }
+
+        /* Roda Putar: putaran roda & goyang lembut (jawapan salah) */
+        #putar-wheel {
+            transition: transform 4s cubic-bezier(0.15, 0.99, 0.24, 0.99);
+        }
+        @keyframes soft-shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: soft-shake 0.4s ease-in-out;
+        }
+
+        /* Nota & Sebutan Diftong: animasi sederhana */
+        .nota-reveal { transition: opacity 0.6s ease, transform 0.6s ease; }
+        .nota-pre { opacity: 0; transform: translateY(18px); }
+        .nota-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .nota-card:hover { transform: translateY(-4px); }
+        @keyframes notaPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+        .nota-playing { animation: notaPop 0.5s ease; }
+        @keyframes notaTwinkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(8deg); }
+        }
+        .nota-star { display: inline-block; animation: notaTwinkle 2.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+            .nota-reveal, .nota-card { transition: none; }
+            .nota-playing, .nota-star { animation: none; }
+            .nota-pre { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-gray-800">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment variables or standard default config for fallback
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dunia-diftong';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSy_demo_key_diftong",
+            authDomain: "dunia-diftong.firebaseapp.com",
+            projectId: "dunia-diftong",
+            storageBucket: "dunia-diftong.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:dftg12345"
+        };
+
+        let app, db, auth;
+        let isFirebaseInitialized = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            isFirebaseInitialized = true;
+            console.log("Firebase & Firestore initialized successfully.");
+
+            // Authenticate safely
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (e) {
+            console.warn("Firestore status: Offline or operating in fallback mode.", e);
+            isFirebaseInitialized = false;
+        }
+
+        window.db = db;
+        window.auth = auth;
+        window.appId = appId;
+        window.isFirebaseInitialized = isFirebaseInitialized;
+
+        // Function to push student scores safely to Firestore
+        window.syncRecordToFirestore = async function() {
+            if (!window.isFirebaseInitialized || !window.db) {
+                console.log("Firestore not available. State stored in local state.");
+                return false;
+            }
+
+            const totalModules = 3; // 'ai', 'au', 'oi'
+            const progressPercent = Math.min(100, Math.round((appData.completedLessons.length / totalModules) * 100));
+
+            const studentDoc = {
+                namaMurid: appData.studentName,
+                markah: appData.coins,
+                tahap: appData.level,
+                peratusKemajuan: progressPercent,
+                tarikhKemasKini: new Date().toISOString()
+            };
+
+            try {
+                // Save under mandated Firestore path structure for artifacts
+                const collectionRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'rekod_murid');
+                const docId = appData.studentName.toLowerCase().replace(/\s+/g, '_');
+                await setDoc(doc(collectionRef, docId), studentDoc, { merge: true });
+                console.log("Record synced to Firestore:", studentDoc);
+                return true;
+            } catch (err) {
+                console.error("Firestore Save Error:", err);
+                return false;
+            }
+        };
+
+        // Function to fetch student records from Firestore
+        window.fetchStudentRecordsFromFirestore = async function() {
+            if (!window.isFirebaseInitialized || !window.db) {
+                return { success: false, records: [], message: "Firestore belum disambungkan atau persekitaran tidak menyokong pangkalan data luar." };
+            }
+
+            try {
+                const collectionRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'rekod_murid');
+                const querySnapshot = await getDocs(collectionRef);
+                const records = [];
+
+                querySnapshot.forEach((docSnap) => {
+                    // Rule 4 & 6: Exclude test document "Ujian" if present
+                    if (docSnap.id.toLowerCase() === 'ujian' || docSnap.data().namaMurid === 'Ujian') {
+                        console.log("Document 'Ujian' identified and safely excluded from student results.");
+                    } else {
+                        records.push({ id: docSnap.id, ...docSnap.data() });
+                    }
+                });
+
+                return { success: true, records: records, message: "Berjaya mendapatkan rekod daripada Firestore." };
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                return { success: false, records: [], message: "Ralat rangkaian atau tiada kebenaran Firestore: " + err.message };
+            }
+        };
+    </script>
+
+    <script>
+        const audioFiles = {
+            selamatDatang: "assets/audio/selamatdatang.mp3",
+            pengenalan: "assets/audio/pengenalan.mp3",
+            effect1: "assets/audio/effect1.mp3",
+            effect2: "assets/audio/effect2.mp3",
+            effect3: "assets/audio/effect3.mp3",
+            // Audio sebutan perkataan diftong (kunci = id kad perkataan)
+            card_ai_tupai: "assets/audio/tupai.mp3",
+            card_ai_pantai: "assets/audio/pantai.mp3",
+            card_ai_serai: "assets/audio/serai.mp3",
+            card_au_harimau: "assets/audio/harimau.mp3",
+            card_au_pulau: "assets/audio/pulau.mp3",
+            card_au_kerbau: "assets/audio/kerbau.mp3",
+            card_oi_kaloi: "assets/audio/kaloi.mp3",
+            card_oi_amboi: "assets/audio/amboi.mp3",
+            card_oi_dodoi: "assets/audio/dodoi.mp3"
+        };
+
+        const EXTERNAL_LINKS = {
+            inclusiveModeUrl: "https://misi-diftong-inklusif-misi-diftong.vercel.app/",
+            learningVideoUrl: "https://www.youtube.com/watch?v=Yi9Jj8ky4EM",
+            padankanDiftongUrl: "https://padankan-diftong-dunia-diftong-pada.vercel.app/"
+        };
+
+        const audioInstances = {};
+
+        function getAudio(key) {
+            if (!audioInstances[key]) {
+                const path = audioFiles[key];
+                audioInstances[key] = new Audio(path);
+                audioInstances[key].onerror = () => {
+                    console.warn(`Audio asset missing or blocked: ${path}`);
+                };
+            }
+            return audioInstances[key];
+        }
+
+        function playSoundEffect(key) {
+            try {
+                const snd = getAudio(key);
+                if (snd) {
+                    snd.currentTime = 0;
+                    snd.play().catch(e => console.log("Audio playback prevented by policy:", e));
+                }
+            } catch (err) {
+                console.log("Audio play error:", err);
+            }
+        }
+
+        // Welcome audio handlers
+        function playWelcomeAudio() {
+            const snd = getAudio('selamatDatang');
+            if (snd) snd.play().catch(e => showToast("ℹ️ Fail audio 'selamatdatang.mp3' belum ditemui dalam folder assets/audio."));
+        }
+        function pauseWelcomeAudio() {
+            const snd = getAudio('selamatDatang');
+            if (snd) snd.pause();
+        }
+        function stopWelcomeAudio() {
+            const snd = getAudio('selamatDatang');
+            if (snd) { snd.pause(); snd.currentTime = 0; }
+        }
+        function restartWelcomeAudio() {
+            const snd = getAudio('selamatDatang');
+            if (snd) { snd.currentTime = 0; snd.play().catch(e => {}); }
+        }
+
+        // Intro Audio
+        function playIntroAudio() {
+            const snd = getAudio('pengenalan');
+            if (snd) snd.play().catch(e => showToast("ℹ️ Fail audio 'pengenalan.mp3' belum ditemui dalam folder assets/audio."));
+        }
+
+        // Audio sebutan perkataan (fail MP3 sepadan, tanpa suara automatik)
+        let currentWordAudioKey = null;
+        function playWordAudio(wordId, wordText) {
+            try {
+                if (currentWordAudioKey && currentWordAudioKey !== wordId && audioInstances[currentWordAudioKey]) {
+                    audioInstances[currentWordAudioKey].pause();
+                }
+                const snd = getAudio(wordId);
+                if (!snd) return;
+                currentWordAudioKey = wordId;
+                snd.currentTime = 0;
+                snd.play().catch(e => {
+                    const fileName = (audioFiles[wordId] || '').split('/').pop();
+                    showToast(`ℹ️ Fail audio '${fileName}' belum ditemui dalam folder assets/audio.`);
+                });
+            } catch (err) {
+                console.log("Word audio error:", err);
+            }
+        }
+
+        // Text-to-speech helper for pronunciation fallback
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ms-MY';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("🔊 " + text);
+            }
+        }
+
+        /* App Data / Gamification Engine State */
+        const DEFAULT_STATE = {
+            studentName: "Adik Ceria",
+            coins: 100,
+            xp: 50,
+            level: 1,
+            completedLessons: [], 
+            unlockedBadges: ['peneroka_muda'],
+            equippedHat: 'cap_none',
+            inventory: ['cap_none'],
+            cardCollection: ['card_ai_tupai'], 
+            quizScoreHistory: [],
+            dailyMissions: [
+                { id: 'm1', text: 'Selesaikan permainan "Bina Kata Diftong"', reward: 30, completed: false, claimed: false },
+                { id: 'm2', text: 'Terokai sekurang-kurangnya 1 Modul Diftong', reward: 20, completed: false, claimed: false },
+                { id: 'm3', text: 'Putar Roda Putar Diftong', reward: 15, completed: false, claimed: false }
+            ]
+        };
+
+        let appData = JSON.parse(localStorage.getItem('dunia_diftong_state')) || DEFAULT_STATE;
+
+        if (!appData.cardCollection) appData.cardCollection = ['card_ai_tupai'];
+        if (!appData.dailyMissions) appData.dailyMissions = DEFAULT_STATE.dailyMissions;
+
+        function saveState() {
+            localStorage.setItem('dunia_diftong_state', JSON.stringify(appData));
+            updateHeaderUI();
+            if (typeof window.syncRecordToFirestore === 'function') {
+                window.syncRecordToFirestore();
+            }
+        }
+
+        function addCoins(amount) {
+            appData.coins += amount;
+            saveState();
+            playSoundEffect('effect1');
+            triggerConfetti();
+        }
+
+        function addXP(amount) {
+            appData.xp += amount;
+            const newLevel = Math.floor(appData.xp / 100) + 1;
+            if (newLevel > appData.level) {
+                appData.level = newLevel;
+                showToast(`🎉 Tahniah! Kamu telah naik ke Tahap ${appData.level}!`);
+            }
+            saveState();
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-msg');
+            if (toast) {
+                toast.innerText = msg;
+                toast.classList.remove('hidden');
+                toast.classList.add('flex');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3500);
+            }
+        }
+
+        function openInclusiveMode() {
+            playSoundEffect('effect3');
+            if (EXTERNAL_LINKS.inclusiveModeUrl) {
+                window.open(EXTERNAL_LINKS.inclusiveModeUrl, '_blank');
+            } else {
+                showToast("ℹ️ Pautan Mod Inklusif belum dikemaskini oleh guru.");
+            }
+        }
+
+        function openLearningVideo() {
+            playSoundEffect('effect3');
+            if (EXTERNAL_LINKS.learningVideoUrl) {
+                window.open(EXTERNAL_LINKS.learningVideoUrl, '_blank');
+            } else {
+                showToast("ℹ️ Pautan Video Pembelajaran belum dikemaskini oleh guru.");
+            }
+        }
+
+        function openPadankanDiftong() {
+            playSoundEffect('effect3');
+            if (EXTERNAL_LINKS.padankanDiftongUrl) {
+                window.open(EXTERNAL_LINKS.padankanDiftongUrl, '_blank');
+            } else {
+                showToast("ℹ️ Pautan Padankan Diftong belum dikemaskini oleh guru.");
+            }
+        }
+    </script>
+
+    <header id="main-header" class="bg-white/90 backdrop-blur-md border-b-4 border-brandYellow sticky top-0 z-50 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex justify-between items-center">
+            <!-- Logo Brand -->
+            <div onclick="navigateTo('page-welcome')" class="cursor-pointer flex items-center space-x-3">
+                <div class="w-12 h-12 bg-brandYellow rounded-2xl flex items-center justify-center text-2xl shadow-inner animate-bounce-soft">
+                    🐱
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-brandPurple leading-tight">DUNIA DIFTONG</h1>
+                    <p class="text-xs text-pink-600 font-medium">Bahasa Melayu Tahun 1</p>
+                </div>
+            </div>
+
+            <!-- Gamification Score Bar -->
+            <div id="gamification-bar" class="hidden flex items-center space-x-3 md:space-x-5">
+                <div class="flex items-center bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full font-bold text-sm border-2 border-purple-300 shadow-sm">
+                    <i class="fa-solid fa-star text-yellow-500 mr-1.5 text-base"></i>
+                    <span>Tahap <span id="ui-level">1</span></span>
+                </div>
+
+                <div class="hidden sm:flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full font-bold text-sm border-2 border-blue-300">
+                    <i class="fa-solid fa-bolt text-blue-500 mr-1.5"></i>
+                    <span id="ui-xp">50 XP</span>
+                </div>
+
+                <div class="flex items-center bg-amber-100 text-amber-800 px-3.5 py-1.5 rounded-full font-bold text-sm border-2 border-amber-400 shadow-sm">
+                    <i class="fa-solid fa-coins text-amber-500 mr-1.5 text-base animate-pulse"></i>
+                    <span id="ui-coins">100</span>
+                </div>
+
+                <button onclick="navigateTo('page-dashboard')" class="bg-brandPink text-white p-2 rounded-full hover:bg-pink-600 transition btn-bounce shadow">
+                    <i class="fa-solid fa-user-gear"></i>
+                </button>
+            </div>
+
+            <!-- Header Quick Action -->
+            <div id="header-nav-buttons" class="flex items-center space-x-2">
+                <button onclick="navigateTo('page-teacher')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-xl text-sm font-bold transition flex items-center shadow-sm">
+                    <i class="fa-solid fa-chalkboard-user mr-1.5"></i> Mod Guru
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Toast Notification -->
+    <div id="toast-msg" class="hidden fixed top-20 right-5 z-50 bg-brandGreen text-white px-5 py-3 rounded-2xl shadow-xl font-bold flex items-center border-2 border-white animate-bounce">
+        <span>Ganjaran diterima!</span>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 flex flex-col justify-center">
+
+        <!-- ================================================================= -->
+        <!-- PAGE 1: WELCOME PAGE -->
+        <!-- ================================================================= -->
+        <section id="page-welcome" class="page-view flex flex-col items-center justify-center py-6 text-center space-y-8">
+            <div class="relative w-full max-w-md my-2">
+                <div class="absolute -top-6 -left-6 text-4xl animate-bounce-soft">✨</div>
+                <div class="absolute top-10 -right-4 text-4xl animate-pulse">🎵</div>
+                <div class="absolute -bottom-4 left-1/4 text-3xl animate-bounce">🌟</div>
+
+                <div class="bg-gradient-to-tr from-brandYellow via-amber-200 to-orange-300 p-6 rounded-3xl shadow-2xl border-4 border-white relative overflow-hidden">
+                    <div class="w-36 h-36 mx-auto bg-white rounded-full flex items-center justify-center text-7xl shadow-inner animate-float">
+                        🐱
+                    </div>
+                    <div class="mt-3 inline-block bg-white/80 backdrop-blur px-4 py-1 rounded-full text-brandPurple font-bold text-sm border border-purple-200">
+                        Si Diftong • Maskot Pintar
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 max-w-2xl px-2">
+                <span class="inline-block bg-red-100 text-red-600 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide border border-red-200 shadow-sm">
+                    🔴 Selamat Datang ke Dunia Pembelajaran Interaktif
+                </span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-brandPurple tracking-wide drop-shadow-md">
+                    DUNIA DIFTONG
+                </h1>
+                <p class="text-xl md:text-2xl font-bold text-brandOrange">
+                    “Jom Kenali AI, AU dan OI!”
+                </p>
+                <p class="text-gray-600 font-medium text-lg">
+                    Mari belajar diftong dengan gembira, kumpul syiling, dan hias avatar kamu!
+                </p>
+            </div>
+
+            <div class="w-full max-w-lg bg-white rounded-3xl p-5 border-4 border-brandYellow shadow-xl space-y-4">
+                <div class="flex items-center justify-center space-x-2 text-brandOrange font-bold text-lg">
+                    <i class="fa-solid fa-music text-xl animate-pulse"></i>
+                    <h2>🎵 Lagu & Aluan Selamat Datang</h2>
+                </div>
+                <p class="text-xs text-gray-500 font-medium">Audio rasmi guru Bahasa Melayu</p>
+
+                <div class="flex items-center justify-center space-x-3 pt-1">
+                    <button onclick="playWelcomeAudio()" class="bg-brandGreen hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold transition flex items-center btn-bounce shadow-md">
+                        <i class="fa-solid fa-play mr-2"></i> Main
+                    </button>
+                    <button onclick="pauseWelcomeAudio()" class="bg-amber-400 hover:bg-amber-500 text-white px-4 py-2 rounded-xl font-bold transition flex items-center btn-bounce shadow-md">
+                        <i class="fa-solid fa-pause mr-2"></i> Jeda
+                    </button>
+                    <button onclick="stopWelcomeAudio()" class="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold transition flex items-center btn-bounce shadow-md">
+                        <i class="fa-solid fa-stop mr-2"></i> Hentikan
+                    </button>
+                    <button onclick="restartWelcomeAudio()" class="bg-brandBlue hover:bg-sky-500 text-white px-4 py-2 rounded-xl font-bold transition flex items-center btn-bounce shadow-md">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Semula
+                    </button>
+                </div>
+                
+                <p class="text-xs text-gray-400 italic">Boleh dihentikan pada bila-bila masa.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-md pt-2">
+                <button onclick="startExploring()" class="flex-1 bg-gradient-to-r from-brandOrange to-amber-500 hover:from-amber-500 hover:to-brandOrange text-white font-extrabold text-xl py-4 px-6 rounded-2xl shadow-lg border-b-4 border-amber-700 transition btn-bounce pulse-glow flex items-center justify-center space-x-2">
+                    <span>🚀 Mula Menjelajah</span>
+                </button>
+                <button onclick="navigateTo('page-teacher')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg py-4 px-6 rounded-2xl shadow-lg border-b-4 border-indigo-900 transition btn-bounce flex items-center justify-center space-x-2">
+                    <span>👩‍🏫 Mod Guru</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- PAGE 2: DASHBOARD -->
+        <!-- ================================================================= -->
+        <section id="page-dashboard" class="page-view hidden space-y-6 py-4">
+            <div class="bg-white rounded-3xl p-6 border-4 border-brandBlue shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-5">
+                    <div class="relative">
+                        <div class="w-24 h-24 bg-brandYellow/40 rounded-2xl border-4 border-brandYellow flex items-center justify-center text-5xl shadow-md relative">
+                            <span id="avatar-display">🐱</span>
+                            <div id="avatar-accessory" class="absolute -top-4 text-3xl"></div>
+                        </div>
+                        <button onclick="openAvatarCustomizer()" class="absolute -bottom-2 -right-2 bg-brandPink text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white shadow">
+                            <i class="fa-solid fa-shirt"></i> Hias
+                        </button>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-2xl font-extrabold text-brandPurple">Hai, <span id="dash-student-name">Adik Ceria</span>! 👋</h2>
+                        </div>
+                        <p class="text-gray-600 font-medium text-sm mt-1">Sedia untuk belajar bunyi diftong hari ini?</p>
+                        
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">
+                                ⭐ Level <span id="dash-level">1</span>
+                            </span>
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full border border-amber-300">
+                                💰 <span id="dash-coins">100</span> Syiling
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-2xl border-2 border-purple-200 flex items-center space-x-3 w-full md:w-auto">
+                    <button onclick="playIntroAudio()" class="w-12 h-12 bg-brandPurple hover:bg-purple-800 text-white rounded-full flex items-center justify-center text-xl shadow-lg btn-bounce">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <div>
+                        <h4 class="font-bold text-brandPurple text-sm">Pengenalan Guru</h4>
+                        <p class="text-xs text-gray-500">Tekan pembesar suara untuk dengar arahan</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-compass text-brandOrange mr-2"></i> Pilih Aktiviti Pembelajaran
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div onclick="openModule('ai')" class="bg-white rounded-3xl p-5 border-4 border-emerald-400 shadow-lg hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl font-extrabold border-2 border-emerald-300">ai</div>
+                            <span class="bg-emerald-100 text-emerald-700 font-bold text-xs px-2.5 py-1 rounded-full">+20 Syiling</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-extrabold text-emerald-800">Diftong 'ai'</h4>
+                            <p class="text-sm text-gray-600 font-medium mt-1">Belajar sebutan kata seperti Tupai, Pantai & Serai.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-emerald-600">
+                            <span>🚀 Terokai Sekarang</span>
+                            <i class="fa-solid fa-circle-arrow-right text-lg"></i>
+                        </div>
+                    </div>
+
+                    <div onclick="openModule('au')" class="bg-white rounded-3xl p-5 border-4 border-amber-400 shadow-lg hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl font-extrabold border-2 border-amber-300">au</div>
+                            <span class="bg-amber-100 text-amber-700 font-bold text-xs px-2.5 py-1 rounded-full">+20 Syiling</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-extrabold text-amber-800">Diftong 'au'</h4>
+                            <p class="text-sm text-gray-600 font-medium mt-1">Belajar sebutan kata seperti Harimau, Pulau & Kerbau.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-amber-600">
+                            <span>🚀 Terokai Sekarang</span>
+                            <i class="fa-solid fa-circle-arrow-right text-lg"></i>
+                        </div>
+                    </div>
+
+                    <div onclick="openModule('oi')" class="bg-white rounded-3xl p-5 border-4 border-pink-400 shadow-lg hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div class="w-14 h-14 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl font-extrabold border-2 border-pink-300">oi</div>
+                            <span class="bg-pink-100 text-pink-700 font-bold text-xs px-2.5 py-1 rounded-full">+20 Syiling</span>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-extrabold text-pink-800">Diftong 'oi'</h4>
+                            <p class="text-sm text-gray-600 font-medium mt-1">Belajar sebutan kata seperti Amboi, Kaloi & Dodoi.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-pink-600">
+                            <span>🚀 Terokai Sekarang</span>
+                            <i class="fa-solid fa-circle-arrow-right text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support & Learning Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div class="bg-white rounded-3xl p-5 border-4 border-teal-400 shadow-lg flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-teal-100 text-teal-800 font-bold text-xs px-3 py-1 rounded-full">Sokongan Khas</span>
+                        <span class="text-3xl">🌈</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-extrabold text-teal-900">🌈 Mod Inklusif</h4>
+                        <p class="text-sm text-gray-600 font-medium mt-1">Pembelajaran khusus mesra sokongan visual & audio berpandu.</p>
+                    </div>
+                    <button onclick="openInclusiveMode()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2.5 px-4 rounded-xl transition btn-bounce flex items-center justify-center">
+                        <span>Buka ➔</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-3xl p-5 border-4 border-red-400 shadow-lg flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-red-100 text-red-800 font-bold text-xs px-3 py-1 rounded-full">Video HD</span>
+                        <span class="text-3xl">🎥</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-extrabold text-red-900">🎥 Video Pembelajaran</h4>
+                        <p class="text-sm text-gray-600 font-medium mt-1">Tonton panduan sebutan & contoh multimedia.</p>
+                    </div>
+                    <button onclick="openLearningVideo()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded-xl transition btn-bounce flex items-center justify-center">
+                        <span>Tonton ➔</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preserved Placeholders Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                <div class="bg-white rounded-3xl p-5 border-4 border-indigo-400 shadow-lg flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1 rounded-full">Interaktif</span>
+                        <span class="text-3xl">🎡</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-extrabold text-indigo-900">🎡 Roda Putar Diftong</h4>
+                        <p class="text-sm text-gray-600 font-medium mt-1">Putar roda dan uji sebutan kata diftong rawak!</p>
+                    </div>
+                    <button onclick="openRodaPutar()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-xl transition btn-bounce flex items-center justify-center">
+                        <span>Main ➔</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-3xl p-5 border-4 border-sky-400 shadow-lg flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-sky-100 text-sky-800 font-bold text-xs px-3 py-1 rounded-full">Rujukan</span>
+                        <span class="text-3xl">📚</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-extrabold text-sky-900">📚 Nota Diftong</h4>
+                        <p class="text-sm text-gray-600 font-medium mt-1">Ringkasan nota tatabahasa dan contoh perkataan.</p>
+                    </div>
+                    <button onclick="openNota()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-xl transition btn-bounce flex items-center justify-center">
+                        <span>Baca ➔</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-3xl p-5 border-4 border-purple-400 shadow-lg flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full">Trialogikal</span>
+                        <span class="text-3xl">👩‍🏫</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-extrabold text-purple-900">👩‍🏫 Ruang Trialogikal</h4>
+                        <p class="text-sm text-gray-600 font-medium mt-1">Kolaborasi pedagogi inovatif bersama guru & rakan.</p>
+                    </div>
+                    <button onclick="openTrialogikal()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 px-4 rounded-xl transition btn-bounce flex items-center justify-center">
+                        <span>Terokai ➔</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gamification Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+                <div onclick="openMissionsModal()" class="bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-3xl p-5 shadow-lg cursor-pointer hover:opacity-95 transition btn-bounce flex flex-col justify-between space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">Ganjaran</span>
+                        <span class="text-3xl">🎯</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-extrabold">🎯 Misi Harian</h4>
+                        <p class="text-xs text-amber-100">Selesaikan cabaran untuk ganjaran!</p>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-1.5 rounded-xl transition">Semak ➔</button>
+                </div>
+
+                <div onclick="openCardCollection()" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-3xl p-5 shadow-lg cursor-pointer hover:opacity-95 transition btn-bounce flex flex-col justify-between space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">Koleksi</span>
+                        <span class="text-3xl">🃏</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-extrabold">🃏 Koleksi Kad</h4>
+                        <p class="text-xs text-emerald-100">Kumpul kad perkataan comel!</p>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-1.5 rounded-xl transition">Lihat Kad ➔</button>
+                </div>
+
+                <div onclick="openRankingModal()" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-3xl p-5 shadow-lg cursor-pointer hover:opacity-95 transition btn-bounce flex flex-col justify-between space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">Papan Skor</span>
+                        <span class="text-3xl">🏆</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-extrabold">🏆 Ranking Kelas</h4>
+                        <p class="text-xs text-purple-100">Lihat kedudukan kamu di kelas!</p>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-1.5 rounded-xl transition">Carta ➔</button>
+                </div>
+
+                <div onclick="openStudentProfile()" class="bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-3xl p-5 shadow-lg cursor-pointer hover:opacity-95 transition btn-bounce flex flex-col justify-between space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">Profil</span>
+                        <span class="text-3xl">👤</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-extrabold">👤 Profil Saya</h4>
+                        <p class="text-xs text-pink-100">Semak rekod & lencana kamu!</p>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 text-white text-xs font-bold py-1.5 rounded-xl transition">Buka ➔</button>
+                </div>
+            </div>
+
+            <!-- Mini Games & Rewards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div onclick="openGameModal()" class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-3xl p-6 text-white shadow-xl cursor-pointer hover:opacity-95 transition btn-bounce flex items-center justify-between">
+                    <div class="space-y-2">
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">🎮 Permainan Mini</span>
+                        <h4 class="text-2xl font-extrabold">Bina Kata Diftong!</h4>
+                        <p class="text-sm text-purple-100">Susun huruf untuk bentuk perkataan betul & dapatkan syiling bonus.</p>
+                    </div>
+                    <div class="text-5xl ml-2">🧩</div>
+                </div>
+
+                <div onclick="openAvatarCustomizer()" class="bg-gradient-to-r from-pink-500 to-rose-500 rounded-3xl p-6 text-white shadow-xl cursor-pointer hover:opacity-95 transition btn-bounce flex items-center justify-between">
+                    <div class="space-y-2">
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">🛍️ Kedai Aksesori</span>
+                        <h4 class="text-2xl font-extrabold">Guna Syiling Kamu!</h4>
+                        <p class="text-sm text-pink-100">Beli topi, mahkota & aksesori comel untuk avatar kamu.</p>
+                    </div>
+                    <div class="text-5xl ml-2">👑</div>
+                </div>
+
+                <div onclick="openPadankanDiftong()" class="md:col-span-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-xl cursor-pointer hover:opacity-95 transition btn-bounce flex items-center justify-between">
+                    <div class="space-y-2">
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">🔗 Permainan Pautan</span>
+                        <h4 class="text-2xl font-extrabold">🎮 Mari Bermain! — Padankan Diftong</h4>
+                        <p class="text-sm text-emerald-100">Tekan untuk membuka permainan Padankan Diftong.</p>
+                    </div>
+                    <div class="text-5xl ml-2">🕹️</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- ================================================================= -->
+        <section id="page-teacher" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-welcome')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Halaman Utama
+                </button>
+                <div class="bg-indigo-100 text-indigo-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-indigo-300">
+                    👩‍🏫 Mod Pengurusan Guru & Dashboard Firestore
+                </div>
+            </div>
+
+            <!-- Teacher Navigation Tabs -->
+            <div class="flex border-b border-indigo-200 bg-white rounded-t-3xl p-2 gap-2 shadow-sm">
+                <button id="tab-btn-audio" onclick="switchTeacherTab('audio')" class="flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-indigo-600 text-white shadow transition">
+                    <i class="fa-solid fa-microphone mr-2"></i> 👩‍🏫 Pengurusan Audio Guru
+                </button>
+                <button id="tab-btn-dashboard" onclick="switchTeacherTab('dashboard')" class="flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-chart-line mr-2"></i> 📊 Dashboard Pencapaian Murid
+                </button>
+            </div>
+
+            <!-- TAB 1: AUDIO MANAGEMENT & BACKUP -->
+            <div id="teacher-panel-audio" class="bg-white rounded-b-3xl p-6 md:p-8 border-4 border-indigo-500 shadow-2xl space-y-6">
+                <!-- Standard Teacher Card Requirement -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-3xl border-2 border-indigo-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="space-y-1 text-center md:text-left">
+                        <span class="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1 rounded-full">Audio Guru</span>
+                        <h3 class="text-2xl font-extrabold text-indigo-900">👩‍🏫 Mod Guru</h3>
+                        <p class="text-sm text-gray-600">Rakam suara guru, muat naik fail audio & pengurusan sandaran.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full font-bold border border-emerald-300">
+                            Status Audio MP3: <span id="teacher-audio-status">Sedia / Standby</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Voice Recording & Upload Studio -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Voice Recorder Unit -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-indigo-200 space-y-4 shadow-sm">
+                        <h4 class="font-bold text-indigo-900 flex items-center text-base">
+                            <i class="fa-solid fa-circle-dot text-red-500 mr-2 animate-pulse"></i> Rakaman Suara Guru Direct
+                        </h4>
+                        <p class="text-xs text-gray-500">Rakam arahan guru terus menggunakan mikrofon peranti.</p>
+                        
+                        <div class="flex items-center justify-center space-x-3 py-2">
+                            <button id="btn-start-record" onclick="startVoiceRecording()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition btn-bounce flex items-center">
+                                <i class="fa-solid fa-microphone mr-2"></i> Mula Rakam
+                            </button>
+                            <button id="btn-stop-record" onclick="stopVoiceRecording()" disabled class="bg-gray-300 text-gray-600 font-bold px-4 py-2 rounded-xl text-sm transition flex items-center cursor-not-allowed">
+                                <i class="fa-solid fa-square mr-2"></i> Tamat
+                            </button>
+                        </div>
+                        <div id="recorder-msg" class="text-xs text-center font-bold text-indigo-600"></div>
+                        <audio id="recording-preview" controls class="w-full hidden mt-2"></audio>
+                    </div>
+
+                    <!-- Audio File Upload Unit -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-purple-200 space-y-4 shadow-sm">
+                        <h4 class="font-bold text-purple-900 flex items-center text-base">
+                            <i class="fa-solid fa-file-audio text-purple-500 mr-2"></i> Muat Naik Fail Audio Baru (.mp3)
+                        </h4>
+                        <p class="text-xs text-gray-500">Pilih sasaran fail audio untuk digantikan sementara:</p>
+                        
+                        <select id="select-audio-target" class="w-full text-xs font-bold p-2 border border-purple-300 rounded-xl bg-purple-50 outline-none">
+                            <option value="selamatDatang">Lagu & Aluan Selamat Datang (selamatdatang.mp3)</option>
+                            <option value="pengenalan">Pengenalan Guru (pengenalan.mp3)</option>
+                        </select>
+
+                        <input type="file" id="input-audio-file" accept="audio/mp3,audio/wav" class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"/>
+                        
+                        <button onclick="handleTeacherAudioUpload()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition btn-bounce">
+                            <i class="fa-solid fa-upload mr-1"></i> Terapkan Fail Audio
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Teacher Audio Settings Guidance -->
+                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-300 text-xs space-y-2">
+                    <h5 class="font-extrabold text-amber-900 flex items-center">
+                        <i class="fa-solid fa-circle-info text-amber-600 mr-2"></i> Arahan Penyelenggaraan Audio Guru (Assets MP3)
+                    </h5>
+                    <p class="text-gray-700">
+                        Aplikasi secara lalai membaca fail MP3 sebenar daripada folder <code class="bg-white px-1 py-0.5 rounded border border-amber-200 font-mono">assets/audio/</code>.
+                        Untuk simpanan kekal, sila ganti fail secara manual di direktori berikut:
+                    </p>
+                    <ul class="list-disc pl-5 font-mono text-gray-800 space-y-1">
+                        <li>assets/audio/selamatdatang.mp3</li>
+                        <li>assets/audio/pengenalan.mp3</li>
+                    </ul>
+                </div>
+
+                <!-- Student Local Settings Form -->
+                <div class="space-y-4 pt-2 border-t">
+                    <h3 class="text-lg font-bold text-gray-800">Tetapan Profil Sesi Murid</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Nama Murid:</label>
+                            <input type="text" id="input-student-name" class="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm" placeholder="Masukkan nama murid">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Tambah Syiling Bonus:</label>
+                            <div class="flex space-x-2">
+                                <input type="number" id="input-bonus-coins" class="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:border-indigo-500 outline-none font-bold text-sm" value="50">
+                                <button onclick="giveTeacherCoins()" class="bg-amber-500 text-white font-bold px-4 py-2 rounded-xl hover:bg-amber-600 transition btn-bounce text-sm">
+                                    Tambah
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="pt-4 border-t flex flex-wrap justify-end gap-3">
+                    <button onclick="saveTeacherSettings()" class="bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-indigo-700 transition btn-bounce text-sm">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Perubahan Sesi
+                    </button>
+                    <button onclick="resetStudentProgress()" class="bg-red-500 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-red-600 transition btn-bounce text-sm">
+                        <i class="fa-solid fa-trash mr-2"></i> Set Semula Semua Data Sesi
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: FIRESTORE DASHBOARD & EXCEL EXPORT -->
+            <div id="teacher-panel-dashboard" class="bg-white rounded-b-3xl p-6 md:p-8 border-4 border-indigo-500 shadow-2xl space-y-6 hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+                    <div>
+                        <h3 class="text-2xl font-extrabold text-indigo-900">📊 Dashboard Pencapaian Murid (Cloud Firestore)</h3>
+                        <p class="text-xs text-gray-500">Pangkalan Data: Firestore Project <span class="font-bold text-indigo-600">Dunia-diftong</span> | Koleksi: <span class="font-bold font-mono text-purple-600">rekod_murid</span></p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="refreshDashboardData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition btn-bounce flex items-center shadow">
+                            <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Muat Semula Data
+                        </button>
+                        <button onclick="downloadExcelReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition btn-bounce flex items-center shadow">
+                            <i class="fa-solid fa-file-excel mr-1.5"></i> 📥 Muat Turun Laporan Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Banner -->
+                <div id="firestore-status-banner" class="p-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-blue-50 text-blue-800 border border-blue-200">
+                    <span id="firestore-status-text">🔄 Sedang menyemak sambungan Cloud Firestore...</span>
+                </div>
+
+                <!-- Class Summary Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200 text-center">
+                        <span class="text-xs font-bold text-indigo-500 uppercase">Jumlah Murid Sah</span>
+                        <div class="text-2xl font-black text-indigo-900 mt-1" id="stat-total-students">0</div>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-center">
+                        <span class="text-xs font-bold text-amber-500 uppercase">Purata Markah</span>
+                        <div class="text-2xl font-black text-amber-900 mt-1" id="stat-avg-score">0</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 text-center">
+                        <span class="text-xs font-bold text-purple-500 uppercase">Purata Kemajuan</span>
+                        <div class="text-2xl font-black text-purple-900 mt-1" id="stat-avg-progress">0%</div>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center">
+                        <span class="text-xs font-bold text-emerald-500 uppercase">Dokumen 'Ujian'</span>
+                        <div class="text-2xl font-black text-emerald-900 mt-1" id="stat-test-docs">Dikesan & Diasingkan</div>
+                    </div>
+                </div>
+
+                <!-- Main Data Table -->
+                <div class="overflow-x-auto border border-gray-200 rounded-2xl shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-indigo-100 text-indigo-900 font-extrabold text-xs uppercase border-b border-indigo-200">
+                                <th class="p-3">Bil.</th>
+                                <th class="p-3">Nama Murid</th>
+                                <th class="p-3">Markah</th>
+                                <th class="p-3">Tahap</th>
+                                <th class="p-3">Peratus Kemajuan</th>
+                                <th class="p-3">Tarikh Rekod</th>
+                            </tr>
+                        </thead>
+                        <tbody id="firestore-records-table-body" class="divide-y divide-gray-100 font-bold text-xs">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-gray-500 italic">Tekan 'Muat Semula Data' untuk mengambil rekod Firestore.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- OTHER EXISTING PAGES PRESERVED EXACTLY -->
+        <!-- ================================================================= -->
+        <section id="page-missions" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-amber-100 text-amber-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-amber-300">
+                    🎯 Misi Harian Murid
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-amber-400 shadow-2xl space-y-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-amber-900">Misi Hari Ini 🌟</h2>
+                    <p class="text-gray-600 font-medium text-sm mt-1">Selesaikan aktiviti untuk dapatkan ganjaran syiling dan XP tambahan!</p>
+                </div>
+                <div id="missions-list-container" class="space-y-4"></div>
+            </div>
+        </section>
+
+        <section id="page-cards" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-emerald-100 text-emerald-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-emerald-300">
+                    🃏 Koleksi Kad Diftong
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-emerald-400 shadow-2xl space-y-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-emerald-900">Koleksi Kad Saya 🃏</h2>
+                    <p class="text-gray-600 font-medium text-sm mt-1">Kumpul kad perkataan diftong dengan menyelesaikan modul pembelajaran!</p>
+                </div>
+                <div id="card-collection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+            </div>
+        </section>
+
+        <section id="page-ranking" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-purple-100 text-purple-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-purple-300">
+                    🏆 Carta Ranking Kelas
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-purple-400 shadow-2xl space-y-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-purple-900">Kedudukan Murid 🥇</h2>
+                    <p class="text-gray-600 font-medium text-sm mt-1">Kedudukan semasa dikemas kini berdasarkan XP murid!</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-purple-100 text-purple-900 font-extrabold text-sm border-b-2 border-purple-200">
+                                <th class="p-3 rounded-l-xl">Kedudukan</th>
+                                <th class="p-3">Nama Murid</th>
+                                <th class="p-3">Tahap</th>
+                                <th class="p-3 rounded-r-xl">Jumlah XP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-table-body" class="divide-y divide-purple-50 font-bold text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-profile" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-pink-100 text-pink-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-pink-300">
+                    👤 Profil & Rekod Murid
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-pink-400 shadow-2xl space-y-6">
+                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 pb-6 border-b">
+                    <div class="relative w-28 h-28 bg-brandYellow/40 rounded-3xl border-4 border-brandYellow flex items-center justify-center text-6xl shadow-md">
+                        <span id="profile-avatar-display">🐱</span>
+                        <div id="profile-accessory-display" class="absolute -top-4 text-3xl"></div>
+                    </div>
+                    <div class="text-center sm:text-left space-y-1">
+                        <h2 class="text-3xl font-extrabold text-brandPurple" id="profile-student-name">Adik Ceria</h2>
+                        <p class="text-gray-500 font-medium text-sm">Murid Tahun 1 Bahasa Melayu</p>
+                        <div class="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
+                            <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">⭐ Tahap <span id="profile-level">1</span></span>
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">💰 <span id="profile-coins">100</span> Syiling</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">⚡ <span id="profile-xp">50</span> XP</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">🏅 Lencana Pencapaian</h3>
+                    <div id="profile-badges-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-module" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Dashboard
+                </button>
+                <div id="module-badge-title" class="bg-brandYellow text-amber-900 font-extrabold px-5 py-2 rounded-2xl border-2 border-amber-400 shadow-sm text-lg">
+                    Modul Diftong 'ai'
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-brandYellow shadow-2xl space-y-8">
+                <div class="text-center space-y-3">
+                    <h2 id="module-main-title" class="text-3xl md:text-4xl font-extrabold text-brandPurple">Bunyi Diftong "AI"</h2>
+                    <p class="text-gray-600 font-medium">Dengarkan sebutan dan sebut bersama-sama:</p>
+                    <div class="flex justify-center items-center my-4">
+                        <button onclick="speakText(currentModuleDiftong)" class="bg-gradient-to-r from-brandOrange to-amber-400 text-white font-extrabold text-3xl px-8 py-5 rounded-3xl shadow-xl hover:scale-105 transition btn-bounce flex items-center space-x-4 border-b-4 border-amber-600">
+                            <i class="fa-solid fa-volume-high text-4xl animate-pulse"></i>
+                            <span id="module-sound-text">AI /ai/</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Contoh Perkataan Diftong</h3>
+                    <div id="word-cards-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
+                </div>
+
+                <div class="text-center pt-4 border-t border-gray-100">
+                    <button onclick="completeCurrentModule()" class="bg-brandGreen hover:bg-emerald-600 text-white font-extrabold text-lg px-8 py-4 rounded-2xl shadow-xl transition btn-bounce flex items-center justify-center mx-auto space-x-2">
+                        <i class="fa-solid fa-circle-check text-2xl"></i>
+                        <span>Saya Sudah Belajar! (+20 Syiling & +30 XP)</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-game" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-purple-100 text-purple-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-purple-300">
+                    🎮 Permainan Permainan Diftong
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-purple-400 shadow-2xl text-center space-y-6">
+                <div class="space-y-1">
+                    <h2 class="text-3xl font-extrabold text-purple-800">Susun Huruf Diftong</h2>
+                    <p class="text-gray-600 font-medium text-sm">Tekan huruf di bawah mengikut urutan yang betul!</p>
+                </div>
+
+                <div class="bg-purple-50 p-6 rounded-2xl border-2 border-purple-200 max-w-md mx-auto space-y-3">
+                    <div id="game-item-emoji" class="text-7xl animate-bounce-soft">🐿️</div>
+                    <div id="game-item-hint" class="text-lg font-bold text-gray-700">Petunjuk: Haiwan comel suka makan kacang</div>
+                    <button onclick="speakText(currentGameWord)" class="bg-brandBlue text-white font-bold text-sm px-4 py-1.5 rounded-full hover:bg-sky-500 transition">
+                        <i class="fa-solid fa-volume-high mr-1"></i> Dengar Sebutan
+                    </button>
+                </div>
+
+                <div id="game-slots" class="flex justify-center space-x-2 my-6"></div>
+                <div id="game-letters-pool" class="flex flex-wrap justify-center gap-3 max-w-md mx-auto"></div>
+
+                <div class="flex justify-center space-x-4 pt-4">
+                    <button onclick="resetGamePuzzle()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-5 py-2.5 rounded-xl transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Semula
+                    </button>
+                    <button onclick="checkGameAnswer()" class="bg-brandGreen hover:bg-emerald-600 text-white font-extrabold px-8 py-2.5 rounded-xl transition shadow-md btn-bounce">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Semak Jawapan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-shop" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <div class="bg-pink-100 text-pink-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-pink-300">
+                    🛍️ Kedai Aksesori Avatar
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border-4 border-pink-400 shadow-2xl space-y-6">
+                <div class="bg-pink-50 p-6 rounded-2xl border-2 border-pink-200 text-center flex flex-col items-center justify-center">
+                    <div class="relative w-28 h-28 bg-white rounded-3xl border-4 border-brandPink flex items-center justify-center text-6xl shadow-inner">
+                        <span id="shop-preview-avatar">🐱</span>
+                        <div id="shop-preview-accessory" class="absolute -top-5 text-4xl"></div>
+                    </div>
+                    <p class="font-bold text-gray-700 mt-3">Pratonton Avatar Kamu</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-3">Pilihan Hiasan Kepala:</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="shop-items-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== RODA PUTAR: Putar dan Dengar — Diftong (dipulihkan daripada fail lama) ===== -->
+        <section id="page-putar" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="closeRodaPutar()" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Menu Utama
+                </button>
+                <div class="bg-indigo-100 text-indigo-800 font-extrabold px-4 py-2 rounded-2xl border-2 border-indigo-300 text-sm">
+                    Soalan: <span id="spin-q-num">1</span>/6 | Skor: <span id="spin-score-count">0</span> Betul
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-indigo-400 shadow-2xl text-center space-y-6">
+                <h2 class="text-3xl font-extrabold text-indigo-800">🎡 Putar dan Dengar — Diftong</h2>
+
+                <div class="max-w-lg mx-auto space-y-6">
+                    <!-- Langkah 1: Roda -->
+                    <div id="spin-wheel-card" class="bg-indigo-50 p-6 rounded-3xl border-2 border-indigo-200 space-y-4">
+                        <div class="relative w-64 h-64 mx-auto flex items-center justify-center">
+                            <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-4xl text-red-500 drop-shadow">▼</div>
+                            <div id="putar-wheel" class="w-60 h-60 rounded-full border-4 border-gray-800 shadow-xl relative overflow-hidden" style="background: conic-gradient(#EF476F 0deg 60deg, #FFD166 60deg 120deg, #06D6A0 120deg 180deg, #118AB2 180deg 240deg, #8338EC 240deg 300deg, #FB5607 300deg 360deg);">
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(30deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q1</span>
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(90deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q2</span>
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(150deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q3</span>
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(210deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q4</span>
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(270deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q5</span>
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none" style="transform: rotate(330deg);">
+                                <span class="absolute top-3 left-1/2 -translate-x-1/2 text-white font-black text-sm font-fun" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">Q6</span>
+                            </div>
+                            </div>
+                            <div class="absolute w-12 h-12 bg-white rounded-full border-4 border-gray-800 z-10 flex items-center justify-center text-xl shadow-inner">🎯</div>
+                        </div>
+
+                        <h3 class="text-2xl font-bold text-indigo-800">Putar Roda Cabaran!</h3>
+                        <p class="text-xs text-gray-600">Putar roda untuk mendapatkan soalan Q1 hingga Q6 secara berurutan.</p>
+                        <button onclick="mulakanPutarRoda()" id="btn-spin-action" class="w-full bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white font-bold text-xl py-4 rounded-2xl shadow-md btn-bounce flex items-center justify-center gap-2">
+                            <span>🎡</span> Putar Roda Sekarang!
+                        </button>
+                    </div>
+
+                    <!-- Langkah 2: Audio & pilihan jawapan -->
+                    <div id="spin-challenge-card" class="hidden bg-indigo-50 p-6 rounded-3xl border-2 border-indigo-200 space-y-6">
+                        <div class="flex flex-col items-center justify-center space-y-3 bg-white p-6 rounded-2xl border-2 border-red-300">
+                            <div id="speaker-icon" class="text-5xl animate-bounce-soft">🔊</div>
+                            <h4 class="font-bold text-lg text-red-600" id="challenge-title-label">Soalan Q1</h4>
+                            <p class="text-xs text-gray-600">Dengar audio perkataan misteri dengan teliti...</p>
+                            <audio id="spin-audio-player" preload="auto"></audio>
+                            <div class="flex items-center gap-2 flex-wrap justify-center">
+                                <button onclick="mainkanAudioPutar()" class="bg-brandBlue hover:bg-sky-500 text-white font-bold px-4 py-2 rounded-xl text-xs btn-bounce flex items-center gap-2">
+                                    <i class="fa-solid fa-volume-high"></i> 🔊 Dengar Sekali Lagi
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="font-bold text-sm text-gray-700 mb-3">Pilih jawapan yang tepat:</h5>
+                            <div id="spin-options-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Langkah 3: Paparan jawapan -->
+                    <div id="spin-result-card" class="hidden bg-indigo-50 p-6 rounded-3xl border-2 border-indigo-200 space-y-4 text-center">
+                        <div id="result-feedback-banner" class="p-3 rounded-2xl font-bold text-lg"></div>
+
+                        <div class="w-32 h-32 mx-auto bg-gray-100 rounded-2xl border-4 border-gray-800 flex items-center justify-center overflow-hidden relative shadow-md">
+                            <img id="reveal-image" src="" alt="Gambar Perkataan" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/150x150/FFD166/000000?text=Diftong';">
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="text-2xl font-black text-red-600" id="reveal-word">PETAI</div>
+                            <span class="bg-yellow-100 border border-yellow-400 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase" id="reveal-diftong">Diftong: AI</span>
+                        </div>
+
+                        <button onclick="lanjutkanPutarSeterusnya()" class="w-full bg-brandGreen hover:bg-emerald-600 text-white font-extrabold text-lg py-3 rounded-2xl shadow-md btn-bounce">
+                            Soalan Seterusnya ➔
+                        </button>
+                    </div>
+
+                    <!-- Langkah 4: Peti Harta Diftong -->
+                    <div id="peti-harta-modal" class="hidden bg-gradient-to-br from-yellow-100 to-amber-200 p-6 rounded-3xl border-4 border-amber-400 shadow-xl space-y-4 text-center">
+                        <div class="text-6xl animate-bounce-soft">🎁</div>
+                        <h3 class="text-3xl font-extrabold text-amber-800">Tahniah! Peti Harta Diftong Dibuka!</h3>
+                        <p class="text-sm font-medium text-amber-900">Anda telah berjaya menyelesaikan kesemua 6 soalan dengan cemerlang. Anda menerima +50 Syiling!</p>
+                        <div class="text-4xl">⭐🏆🪙</div>
+                        <button onclick="tutupPetiHarta()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-lg py-3 rounded-2xl shadow-md btn-bounce">
+                            Tuntut Ganjaran!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== RUANG TRIALOGIKAL (dipulihkan daripada fail lama) ===== -->
+        <section id="page-trialogikal" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="navigateTo('page-dashboard')" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Menu Utama
+                </button>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-emerald-400 shadow-2xl space-y-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-emerald-700">👥 Ruang Trialogikal (Kolaborasi Kelas)</h2>
+
+                <div class="bg-emerald-50 rounded-3xl p-5 sm:p-7 border-2 border-emerald-300 space-y-6 text-gray-800 text-sm sm:text-base leading-relaxed text-left">
+                    <h3 class="text-xl sm:text-2xl font-bold text-emerald-900 border-b border-emerald-200 pb-2">
+                        Perkaitan Pembelajaran Trialogikal – Dunia Diftong
+                    </h3>
+
+                    <ul class="space-y-4 font-medium list-none pl-0">
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Pembelajaran secara kolaboratif:</strong> Murid inklusif bekerjasama dengan rakan untuk mengenal pasti perkataan yang mengandungi diftong ai, au dan oi melalui permainan Roda Putar dan Misi Diftong serta Laman Padankan Diftong. Aktiviti ini menggalakkan komunikasi, perkongsian idea dan interaksi sosial.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Pembentukan artifak ilmu pengetahuan:</strong> Kad perkataan, Roda Putar dan Misi Diftong serta Laman Padankan Diftong, gambar, audio sebutan dan video pembelajaran bertindak sebagai bahan digital yang membantu murid membina serta mengukuhkan pengetahuan tentang diftong. Hasil pembelajaran turut dikumpulkan dalam bentuk koleksi kad dan lencana.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Menyelesaikan masalah pembelajaran:</strong> Murid yang sukar membezakan bunyi diftong boleh mendengar audio berulang kali, melihat gambar dan memilih jawapan dalam permainan. Sokongan ini membantu murid mengenal pasti bunyi dengan lebih tepat dan mengurangkan kebergantungan pada arahan lisan guru sahaja.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Mencetuskan idea baharu:</strong> Permainan Roda Putar dan Misi Diftong serta Laman Padankan Diftong menggabungkan kad, roda putaran, audio dan ganjaran digital. Gabungan ini menjadikan latihan mendengar dan bertutur lebih menarik berbanding latihan bertulis semata-mata.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Meningkatkan kemahiran interaksi sosial:</strong> Murid boleh berbincang tentang jawapan, menyebut perkataan secara bergilir-gilir dan membantu rakan mengenal pasti diftong yang betul. Guru bertindak sebagai pembimbing sepanjang aktiviti.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 text-lg shrink-0 mt-0.5">🔹</span>
+                            <div>
+                                <strong class="text-emerald-950 font-bold">Pengecaman sebutan dan penambahbaikan pembelajaran:</strong> Fungsi pengecaman pertuturan boleh membantu murid berlatih menyebut perkataan yang mengandungi diftong ai, au dan oi. Murid menyebut perkataan seperti pandai, pulau dan amboi menggunakan mikrofon. Sistem memproses pertuturan untuk membandingkan perkataan yang dikesan dengan perkataan sasaran. Jika terdapat ketidakpadanan, murid boleh mendengar audio contoh, mencuba semula dan mendapatkan bimbingan guru. Rekod latihan yang sesuai boleh menyokong refleksi dan perbincangan tentang perkembangan kemahiran mendengar dan bertutur. Hasil latihan ini juga menjadi artifak pembelajaran yang boleh dikongsi, dinilai dan ditambah baik bersama. <em>(Fungsi ini belum dilaksanakan dalam Dunia Diftong — lihat Nota Teknikal di bawah.)</em>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-200 space-y-3 mt-6">
+                        <h4 class="text-lg font-bold text-emerald-900 border-b border-gray-100 pb-1">
+                            Contoh senario murid inklusif
+                        </h4>
+                        <p class="italic text-gray-700 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                            <strong>Senario:</strong> Seorang murid inklusif Tahun 1 menghadapi kesukaran membezakan sebutan perkataan <em>pandai</em>, <em>pulau</em> dan <em>amboi</em>. Murid mudah hilang fokus apabila guru menggunakan latihan bertulis yang panjang dan kurang yakin menyebut perkataan di hadapan kelas.
+                        </p>
+                        <div class="space-y-2 pt-1">
+                            <h5 class="font-bold text-emerald-900">1. Mendengar dan bertutur</h5>
+                            <p class="text-gray-800">
+                                Guru membuka Mod Inklusif dalam Dunia Diftong. Murid melihat gambar pulau dan menekan butang audio untuk mendengar sebutan perkataan pulau. Murid boleh memainkan audio semula sehingga lebih memahami sebutannya. Kemudian, murid boleh menyebut perkataan yang mengandungi diftong. Terdapat kemudahan pengecaman sebutan yang boleh memastikan murid menyebutnya dengan betul.
+                            </p>
+                            <p class="text-gray-800">
+                                Dunia Diftong juga mempunyai Mod Guru dan ranking kelas yang memaparkan rekod pencapaian murid. Selain itu, guru dapat mengenal pasti kelemahan murid berdasarkan markah, tahap penguasaan dan rekod aktiviti yang tersedia, khususnya dalam mengenal pasti serta membezakan diftong ai, au dan oi. Maklumat ini membantu guru merancang bimbingan dan aktiviti pemulihan yang bersesuaian dengan keperluan pembelajaran murid.
+                            </p>
+                        </div>
+
+                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-300 rounded-xl text-xs text-yellow-800 flex items-start gap-2">
+                            <span>ℹ️</span>
+                            <span><strong>Nota Teknikal:</strong> Fungsi pengecaman sebutan secara automatik memerlukan pelaksanaan atau pengesahan teknikal integrasi mikrofon Web Speech API pada masa hadapan. Pada masa ini, pengecaman pertuturan belum dilaksanakan dalam Dunia Diftong (mikrofon hanya digunakan untuk rakaman dalam Mod Guru). Web Speech API lazimnya menukarkan pertuturan kepada teks, dan padanan teks tidak membuktikan ketepatan sebutan diftong.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t-2 border-gray-100 text-left">
+                    <div class="bg-gray-50 p-6 rounded-3xl border-2 border-gray-300 space-y-4">
+                        <h3 class="font-bold text-lg">Cipta Ayat Diftong Baru</h3>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Pilih Diftong:</label>
+                            <select id="trialog-diftong" class="w-full bg-white border-2 border-gray-300 rounded-xl p-2 font-medium text-sm">
+                                <option value="ai">ai (Contoh: Balai, Sampai, Serai)</option>
+                                <option value="au">au (Contoh: Kerbau, Harimau, Pulau)</option>
+                                <option value="oi">oi (Contoh: Amboi, Kaloi)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Tulis Ayat Anda:</label>
+                            <textarea id="trialog-text" rows="3" placeholder="Contoh: Pak Cik Ali memelihara kerbau..." class="select-text w-full bg-white border-2 border-gray-300 rounded-xl p-2 font-medium text-sm"></textarea>
+                        </div>
+                        <button onclick="hantarTrialog()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md btn-bounce">
+                            Hantar ke Papan Bersama
+                        </button>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-4">
+                        <h3 class="font-bold text-lg">Papan Objek Pengetahuan Bersama</h3>
+                        <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2" id="trialog-posts-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== NOTA & SEBUTAN DIFTONG (dipulihkan daripada fail lama dan dikemas kini) ===== -->
+        <section id="page-nota" class="page-view hidden space-y-6 py-4">
+            <div class="flex justify-between items-center">
+                <button onclick="tutupNota()" class="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-2xl font-bold shadow-md border border-gray-200 transition flex items-center btn-bounce">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Menu Utama
+                </button>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 border-4 border-sky-400 shadow-2xl space-y-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-sky-800">📚 Nota &amp; Sebutan Diftong</h2>
+
+                <p class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 italic font-semibold text-sky-900 text-base leading-relaxed">
+                    📚 Selamat datang ke Ruang Nota Diftong! Kenali, dengar dan sebut perkataan diftong AI, AU dan OI. Tekan butang audio untuk belajar. Selamat mencuba!
+                </p>
+
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-end gap-3">
+                    <div class="flex-1">
+                        <label for="nota-student-name" class="block text-sm font-bold text-amber-900 mb-1">✏️ Tulis nama kamu sebelum mula:</label>
+                        <input type="text" id="nota-student-name" maxlength="30" placeholder="Contoh: Adik Ceria" class="select-text w-full px-4 py-3 text-lg font-bold border-2 border-amber-300 rounded-xl focus:border-amber-500 outline-none bg-white">
+                    </div>
+                    <button onclick="simpanNamaNota()" class="bg-brandGreen hover:bg-emerald-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-md transition btn-bounce">
+                        <i class="fa-solid fa-check mr-1"></i> Simpan Nama
+                    </button>
+                </div>
+
+                <div id="nota-diftong-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+                <div id="nota-semangat" class="nota-reveal bg-gradient-to-r from-yellow-50 to-pink-50 border-2 border-yellow-200 rounded-2xl p-5 flex items-center gap-4">
+                    <span class="nota-star text-4xl shrink-0">⭐</span>
+                    <p class="font-bold text-amber-900 text-base sm:text-lg leading-relaxed">“Hebat! Teruskan mendengar, menyebut dan belajar. Setiap percubaan menjadikan kamu semakin mahir!”</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t-2 border-gray-200 py-4 text-center text-xs text-gray-500 font-medium mt-6">
+        <p>DUNIA DIFTONG • Aplikasi Pembelajaran Interaktif Bahasa Melayu Sekolah Rendah © 2026</p>
+    </footer>
+
+    <script>
+        const MODULE_DATA = {
+            ai: {
+                title: "Diftong 'ai'",
+                soundText: "AI /ai/",
+                words: [
+                    { id: 'card_ai_tupai', word: "Tupai", emoji: "🐿️", syllable: "Tu - pai" },
+                    { id: 'card_ai_pantai', word: "Pantai", emoji: "🏖️", syllable: "Pan - tai" },
+                    { id: 'card_ai_serai', word: "Serai", emoji: "🌿", syllable: "Se - rai" }
+                ]
+            },
+            au: {
+                title: "Diftong 'au'",
+                soundText: "AU /au/",
+                words: [
+                    { id: 'card_au_harimau', word: "Harimau", emoji: "🐯", syllable: "Ha - ri - mau" },
+                    { id: 'card_au_pulau', word: "Pulau", emoji: "🏝️", syllable: "Pu - lau" },
+                    { id: 'card_au_kerbau', word: "Kerbau", emoji: "🐃", syllable: "Ker - bau" }
+                ]
+            },
+            oi: {
+                title: "Diftong 'oi'",
+                soundText: "OI /oi/",
+                words: [
+                    { id: 'card_oi_kaloi', word: "Kaloi", emoji: "🐠", syllable: "Ka - loi" },
+                    { id: 'card_oi_amboi', word: "Amboi", emoji: "😮", syllable: "Am - boi" },
+                    { id: 'card_oi_dodoi', word: "Dodoi", emoji: "👶", syllable: "Do - doi" }
+                ]
+            }
+        };
+
+        const ALL_COLLECTIBLE_CARDS = [
+            { id: 'card_ai_tupai', word: "Tupai", diftong: "ai", emoji: "🐿️" },
+            { id: 'card_ai_pantai', word: "Pantai", diftong: "ai", emoji: "🏖️" },
+            { id: 'card_ai_serai', word: "Serai", diftong: "ai", emoji: "🌿" },
+            { id: 'card_au_harimau', word: "Harimau", diftong: "au", emoji: "🐯" },
+            { id: 'card_au_pulau', word: "Pulau", diftong: "au", emoji: "🏝️" },
+            { id: 'card_au_kerbau', word: "Kerbau", diftong: "au", emoji: "🐃" },
+            { id: 'card_oi_kaloi', word: "Kaloi", diftong: "oi", emoji: "🐠" },
+            { id: 'card_oi_amboi', word: "Amboi", diftong: "oi", emoji: "😮" },
+            { id: 'card_oi_dodoi', word: "Dodoi", diftong: "oi", emoji: "👶" }
+        ];
+
+        const ALL_BADGES = [
+            { id: 'peneroka_muda', title: 'Peneroka Muda', desc: 'Mula meneroka Dunia Diftong', icon: '🌟' },
+            { id: 'master_ai', title: 'Pakar AI', desc: 'Selesaikan modul Diftong AI', icon: '🐿️' },
+            { id: 'pembina_kata', title: 'Pembina Kata', desc: 'Menangi permainan susun huruf', icon: '🧩' },
+            { id: 'kolektor_kad', title: 'Kolektor Kad', desc: 'Kumpul 3 kad diftong', icon: '🃏' }
+        ];
+
+        const SHOP_ITEMS = [
+            { id: 'cap_none', name: 'Tiada', icon: '❌', price: 0 },
+            { id: 'cap_party', name: 'Topi Pesta', icon: '🥳', price: 30 },
+            { id: 'cap_crown', name: 'Mahkota Raja', icon: '👑', price: 60 },
+            { id: 'cap_grad', name: 'Topi Bijak', icon: '🎓', price: 100 },
+            // Aksesori murah tambahan
+            { id: 'acc_heart', name: 'Hati Comel', icon: '❤️', price: 5 },
+            { id: 'acc_ribbon', name: 'Reben Comel', icon: '🎀', price: 5 },
+            { id: 'acc_strawberry', name: 'Strawberi', icon: '🍓', price: 5 },
+            { id: 'acc_cloud', name: 'Awan Putih', icon: '☁️', price: 5 },
+            { id: 'acc_clover', name: 'Daun Bertuah', icon: '🍀', price: 6 },
+            { id: 'acc_balloon', name: 'Belon Merah', icon: '🎈', price: 6 },
+            { id: 'acc_flower', name: 'Bunga Cantik', icon: '🌸', price: 8 },
+            { id: 'acc_sunflower', name: 'Bunga Matahari', icon: '🌻', price: 8 },
+            { id: 'acc_cap', name: 'Topi Kap', icon: '🧢', price: 8 },
+            { id: 'acc_star', name: 'Bintang Emas', icon: '⭐', price: 10 },
+            { id: 'acc_butterfly', name: 'Rama-rama', icon: '🦋', price: 10 },
+            { id: 'acc_bee', name: 'Lebah Comel', icon: '🐝', price: 10 },
+            { id: 'acc_tophat', name: 'Topi Tinggi', icon: '🎩', price: 12 },
+            { id: 'acc_straw', name: 'Topi Jerami', icon: '👒', price: 12 },
+            { id: 'acc_moon', name: 'Bulan Sabit', icon: '🌙', price: 12 },
+            { id: 'acc_rainbow', name: 'Pelangi', icon: '🌈', price: 15 },
+            { id: 'acc_headphone', name: 'Fon Kepala', icon: '🎧', price: 20 }
+        ];
+
+        let currentModuleKey = 'ai';
+        let currentModuleDiftong = 'ai';
+        let currentGameWord = 'Tupai';
+        let gameUserAnswers = [];
+        let fetchedTeacherRecords = [];
+
+        // Navigation Controller
+        function navigateTo(pageId) {
+            playSoundEffect('effect3');
+            document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+            
+            const target = document.getElementById(pageId);
+            if (target) target.classList.remove('hidden');
+
+            const gBar = document.getElementById('gamification-bar');
+            if (pageId === 'page-welcome') {
+                gBar.classList.add('hidden');
+            } else {
+                gBar.classList.remove('hidden');
+            }
+
+            updateHeaderUI();
+            if (pageId === 'page-teacher') {
+                refreshDashboardData();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startExploring() {
+            playSoundEffect('effect2');
+            navigateTo('page-dashboard');
+        }
+
+        function updateHeaderUI() {
+            document.getElementById('ui-level').innerText = appData.level;
+            document.getElementById('ui-xp').innerText = appData.xp + " XP";
+            document.getElementById('ui-coins').innerText = appData.coins;
+
+            document.getElementById('dash-student-name').innerText = appData.studentName;
+            document.getElementById('dash-level').innerText = appData.level;
+            document.getElementById('dash-coins').innerText = appData.coins;
+
+            document.getElementById('input-student-name').value = appData.studentName;
+
+            const equipped = SHOP_ITEMS.find(i => i.id === appData.equippedHat);
+            const hatIcon = (equipped && equipped.id !== 'cap_none') ? equipped.icon : '';
+            document.getElementById('avatar-accessory').innerText = hatIcon;
+            document.getElementById('shop-preview-accessory').innerText = hatIcon;
+            if (document.getElementById('profile-accessory-display')) {
+                document.getElementById('profile-accessory-display').innerText = hatIcon;
+            }
+        }
+
+        /* Teacher Mode Sub-tab Navigation */
+        function switchTeacherTab(tabKey) {
+            playSoundEffect('effect3');
+            const btnAudio = document.getElementById('tab-btn-audio');
+            const btnDashboard = document.getElementById('tab-btn-dashboard');
+            const panelAudio = document.getElementById('teacher-panel-audio');
+            const panelDashboard = document.getElementById('teacher-panel-dashboard');
+
+            if (tabKey === 'audio') {
+                btnAudio.className = "flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-indigo-600 text-white shadow transition";
+                btnDashboard.className = "flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition";
+                panelAudio.classList.remove('hidden');
+                panelDashboard.classList.add('hidden');
+            } else {
+                btnDashboard.className = "flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-indigo-600 text-white shadow transition";
+                btnAudio.className = "flex-1 py-3 px-4 font-bold text-center rounded-2xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition";
+                panelDashboard.classList.remove('hidden');
+                panelAudio.classList.add('hidden');
+                refreshDashboardData();
+            }
+        }
+
+        /* Voice Recorder Feature */
+        let mediaRecorder;
+        let audioChunks = [];
+
+        async function startVoiceRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast("❌ Pelayar anda tidak menyokong fungsi rakaman suara direct.");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const preview = document.getElementById('recording-preview');
+                    preview.src = audioUrl;
+                    preview.classList.remove('hidden');
+                    document.getElementById('teacher-audio-status').innerText = "Rakaman Suara Tersedia (Memori Sesi)";
+                    showToast("🎙️ Rakaman selesai! Boleh didengar pada pemain audio.");
+                };
+
+                mediaRecorder.start();
+                document.getElementById('btn-start-record').disabled = true;
+                document.getElementById('btn-stop-record').disabled = false;
+                document.getElementById('btn-stop-record').classList.remove('bg-gray-300', 'cursor-not-allowed');
+                document.getElementById('btn-stop-record').classList.add('bg-red-600');
+                document.getElementById('recorder-msg').innerText = "🔴 Sedang merakam... Sila bercakap.";
+            } catch (err) {
+                showToast("⚠️ Kebenaran mikrofon ditolak atau tidak disokong.");
+            }
+        }
+
+        function stopVoiceRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                document.getElementById('btn-start-record').disabled = false;
+                document.getElementById('btn-stop-record').disabled = true;
+                document.getElementById('btn-stop-record').classList.add('bg-gray-300', 'cursor-not-allowed');
+                document.getElementById('recorder-msg').innerText = "✅ Rakaman selesai.";
+            }
+        }
+
+        function handleTeacherAudioUpload() {
+            const input = document.getElementById('input-audio-file');
+            const target = document.getElementById('select-audio-target').value;
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileURL = URL.createObjectURL(file);
+                
+                // Assign to audio element memory instance
+                if (!audioInstances[target]) {
+                    audioInstances[target] = new Audio(fileURL);
+                } else {
+                    audioInstances[target].src = fileURL;
+                }
+
+                document.getElementById('teacher-audio-status').innerText = `Fail dikemas kini (${file.name})`;
+                showToast(`✅ Audio ${target} telah dikemas kini dalam sesi semasa.`);
+            } else {
+                showToast("⚠️ Sila pilih fail audio MP3 terlebih dahulu.");
+            }
+        }
+
+        function saveTeacherSettings() {
+            const nameVal = document.getElementById('input-student-name').value.trim();
+            if (nameVal) {
+                appData.studentName = nameVal;
+                saveState();
+                showToast("✅ Tetapan nama murid berjaya disimpan.");
+            }
+        }
+
+        function giveTeacherCoins() {
+            const coinsVal = parseInt(document.getElementById('input-bonus-coins').value) || 0;
+            if (coinsVal > 0) {
+                addCoins(coinsVal);
+                showToast(`💰 Bonus +${coinsVal} syiling diberi oleh Guru!`);
+            }
+        }
+
+        function resetStudentProgress() {
+            if (confirm("Adakah anda pasti untuk menetapkan semula semua kemajuan murid?")) {
+                localStorage.removeItem('dunia_diftong_state');
+                appData = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                saveState();
+                showToast("🔄 Semua data kemajuan telah diset semula.");
+            }
+        }
+
+        /* Firestore Dashboard Refresh & Binding */
+        async function refreshDashboardData() {
+            const statusBanner = document.getElementById('firestore-status-banner');
+            const statusText = document.getElementById('firestore-status-text');
+            const tbody = document.getElementById('firestore-records-table-body');
+
+            statusText.innerText = "🔄 Sedang membaca rekod terkini daripada Cloud Firestore...";
+
+            if (typeof window.fetchStudentRecordsFromFirestore === 'function') {
+                const res = await window.fetchStudentRecordsFromFirestore();
+                
+                if (res.success) {
+                    statusBanner.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-emerald-50 text-emerald-800 border border-emerald-300";
+                    statusText.innerText = `✅ Sambungan Firestore Aktif: ${res.records.length} rekod murid sah diterima. Dokumen 'Ujian' diasingkan secara automatik.`;
+                    
+                    fetchedTeacherRecords = res.records;
+                    renderDashboardTable(res.records);
+                } else {
+                    statusBanner.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-amber-50 text-amber-800 border border-amber-300";
+                    statusText.innerText = `⚠️ ${res.message}`;
+                    
+                    // Fallback local memory display
+                    const totalModules = 3;
+                    const progressPercent = Math.min(100, Math.round((appData.completedLessons.length / totalModules) * 100));
+                    const localRecord = [{
+                        id: 'local_session',
+                        namaMurid: appData.studentName,
+                        markah: appData.coins,
+                        tahap: appData.level,
+                        peratusKemajuan: progressPercent,
+                        tarikhKemasKini: new Date().toISOString()
+                    }];
+                    fetchedTeacherRecords = localRecord;
+                    renderDashboardTable(localRecord);
+                }
+            }
+        }
+
+        function renderDashboardTable(records) {
+            const tbody = document.getElementById('firestore-records-table-body');
+            tbody.innerHTML = '';
+
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500 italic">Tiada rekod murid sah ditemui dalam koleksi 'rekod_murid'.</td></tr>`;
+                document.getElementById('stat-total-students').innerText = "0";
+                document.getElementById('stat-avg-score').innerText = "0";
+                document.getElementById('stat-avg-progress').innerText = "0%";
+                return;
+            }
+
+            let totalScore = 0;
+            let totalProgress = 0;
+
+            records.forEach((rec, idx) => {
+                totalScore += (rec.markah || 0);
+                totalProgress += (rec.peratusKemajuan || 0);
+
+                const dateStr = rec.tarikhKemasKini ? new Date(rec.tarikhKemasKini).toLocaleString('ms-MY') : '-';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-indigo-50/50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">${idx + 1}</td>
+                    <td class="p-3 font-extrabold text-indigo-950">${rec.namaMurid || 'Adik Ceria'}</td>
+                    <td class="p-3 text-amber-700 font-black">${rec.markah || 0}</td>
+                    <td class="p-3"><span class="bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full border border-purple-200">Tahap ${rec.tahap || 1}</span></td>
+                    <td class="p-3 text-emerald-700 font-extrabold">${rec.peratusKemajuan || 0}%</td>
+                    <td class="p-3 text-gray-500 font-normal">${dateStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('stat-total-students').innerText = records.length;
+            document.getElementById('stat-avg-score').innerText = Math.round(totalScore / records.length);
+            document.getElementById('stat-avg-progress').innerText = Math.round(totalProgress / records.length) + "%";
+        }
+
+        /* Excel Report Export via SheetJS */
+        function downloadExcelReport() {
+            if (!fetchedTeacherRecords || fetchedTeacherRecords.length === 0) {
+                showToast("⚠️ Laporan tidak dapat dijana kerana tiada rekod murid yang sah.");
+                return;
+            }
+
+            try {
+                const totalStudents = fetchedTeacherRecords.length;
+                let totalScore = 0;
+                let totalProgress = 0;
+
+                fetchedTeacherRecords.forEach(r => {
+                    totalScore += (r.markah || 0);
+                    totalProgress += (r.peratusKemajuan || 0);
+                });
+
+                const avgScore = Math.round(totalScore / totalStudents);
+                const avgProgress = Math.round(totalProgress / totalStudents);
+                const reportDate = new Date().toLocaleString('ms-MY');
+
+                // Sheet 1: Summary Data
+                const sheet1Data = [
+                    ["RINGKASAN PENCAPAIAN KELAS - DUNIA DIFTONG"],
+                    ["Tarikh Laporan Dijana", reportDate],
+                    ["Projek Firebase", "Dunia-diftong"],
+                    ["Koleksi Firestore", "rekod_murid"],
+                    [""],
+                    ["Meter Kualiti", "Nilai Ringkasan"],
+                    ["Jumlah Rekod Murid Sah", totalStudents],
+                    ["Purata Markah Kelas", avgScore],
+                    ["Purata Peratus Kemajuan Kelas", `${avgProgress}%`],
+                    ["Dokumen 'Ujian' Diasingkan", "Ya (Tidak Diisi)"]
+                ];
+
+                // Sheet 2: Student Detailed Records
+                const sheet2Data = [
+                    ["Bil.", "Nama Murid", "Markah", "Tahap", "Peratus Kemajuan", "Tarikh Kemas Kini"]
+                ];
+
+                fetchedTeacherRecords.forEach((r, idx) => {
+                    const dateStr = r.tarikhKemasKini ? new Date(r.tarikhKemasKini).toLocaleString('ms-MY') : '-';
+                    sheet2Data.push([
+                        idx + 1,
+                        r.namaMurid || 'Adik Ceria',
+                        r.markah || 0,
+                        `Tahap ${r.tahap || 1}`,
+                        `${r.peratusKemajuan || 0}%`,
+                        dateStr
+                    ]);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+                const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+
+                XLSX.utils.book_append_sheet(wb, ws1, "Ringkasan Kelas");
+                XLSX.utils.book_append_sheet(wb, ws2, "Rekod Pencapaian Murid");
+
+                XLSX.writeFile(wb, "Laporan_Dunia_Diftong.xlsx");
+                showToast("📥 Fail 'Laporan_Dunia_Diftong.xlsx' berjaya dimuat turun!");
+            } catch (err) {
+                console.error("Export Error:", err);
+                showToast("❌ Ralat semasa menjana fail Excel: " + err.message);
+            }
+        }
+
+        /* Modules & Game Handlers */
+        function openModule(key) {
+            currentModuleKey = key;
+            const mod = MODULE_DATA[key];
+            if (!mod) return;
+
+            currentModuleDiftong = key;
+            document.getElementById('module-badge-title').innerText = `Modul ${mod.title}`;
+            document.getElementById('module-main-title').innerText = `Bunyi Diftong "${key.toUpperCase()}"`;
+            document.getElementById('module-sound-text').innerText = mod.soundText;
+
+            const grid = document.getElementById('word-cards-grid');
+            grid.innerHTML = '';
+
+            mod.words.forEach(w => {
+                const card = document.createElement('div');
+                card.className = "bg-gradient-to-b from-amber-50 to-orange-50 p-5 rounded-3xl border-4 border-amber-300 text-center shadow-md space-y-3 hover:scale-105 transition cursor-pointer btn-bounce";
+                card.onclick = () => playWordAudio(w.id, w.word);
+                card.innerHTML = `
+                    <div class="text-6xl my-2 animate-bounce-soft">${w.emoji}</div>
+                    <div class="text-2xl font-extrabold text-amber-900">${w.word}</div>
+                    <div class="bg-white/80 py-1 px-3 rounded-full text-xs font-bold text-amber-800 border border-amber-200">
+                        Suku Kata: ${w.syllable}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            navigateTo('page-module');
+        }
+
+        function completeCurrentModule() {
+            addCoins(20);
+            addXP(30);
+            if (!appData.completedLessons.includes(currentModuleKey)) {
+                appData.completedLessons.push(currentModuleKey);
+            }
+
+            const mod = MODULE_DATA[currentModuleKey];
+            if (mod && mod.words) {
+                mod.words.forEach(w => {
+                    if (!appData.cardCollection.includes(w.id)) {
+                        appData.cardCollection.push(w.id);
+                    }
+                });
+            }
+
+            const m2 = appData.dailyMissions.find(m => m.id === 'm2');
+            if (m2 && !m2.completed) {
+                m2.completed = true;
+            }
+
+            saveState();
+            showToast("🎉 Tahniah! Kamu dapat +20 Syiling, +30 XP & Kad Baharu!");
+            setTimeout(() => navigateTo('page-dashboard'), 1500);
+        }
+
+        function openGameModal() {
+            currentGameWord = "Tupai";
+            resetGamePuzzle();
+            navigateTo('page-game');
+        }
+
+        function resetGamePuzzle() {
+            gameUserAnswers = [];
+            const letters = currentGameWord.toUpperCase().split('');
+            const scrambled = [...letters].sort(() => Math.random() - 0.5);
+
+            const slotsDiv = document.getElementById('game-slots');
+            slotsDiv.innerHTML = '';
+            for (let i = 0; i < letters.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = "w-12 h-12 bg-purple-100 border-4 border-purple-300 rounded-2xl flex items-center justify-center text-2xl font-extrabold text-purple-900 shadow-inner";
+                slot.id = `slot-${i}`;
+                slotsDiv.appendChild(slot);
+            }
+
+            const poolDiv = document.getElementById('game-letters-pool');
+            poolDiv.innerHTML = '';
+            scrambled.forEach((char, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-12 h-12 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-2xl rounded-2xl shadow-md border-b-4 border-amber-600 btn-bounce";
+                btn.innerText = char;
+                btn.onclick = () => selectGameLetter(char, btn);
+                poolDiv.appendChild(btn);
+            });
+        }
+
+        function selectGameLetter(char, btn) {
+            if (gameUserAnswers.length < currentGameWord.length) {
+                gameUserAnswers.push(char);
+                const currentSlotIdx = gameUserAnswers.length - 1;
+                document.getElementById(`slot-${currentSlotIdx}`).innerText = char;
+                btn.disabled = true;
+                btn.classList.add('opacity-30', 'cursor-not-allowed');
+                playSoundEffect('effect1');
+            }
+        }
+
+        function checkGameAnswer() {
+            const userStr = gameUserAnswers.join('');
+            if (userStr === currentGameWord.toUpperCase()) {
+                addCoins(30);
+                addXP(40);
+
+                const m1 = appData.dailyMissions.find(m => m.id === 'm1');
+                if (m1 && !m1.completed) {
+                    m1.completed = true;
+                }
+
+                if (!appData.unlockedBadges.includes('pembina_kata')) {
+                    appData.unlockedBadges.push('pembina_kata');
+                }
+
+                saveState();
+                showToast("🌟 JAWAPAN BETUL! Kamu dapat 30 Syiling & Misi Dikemas Kini!");
+                setTimeout(() => navigateTo('page-dashboard'), 1800);
+            } else {
+                playSoundEffect('effect3');
+                showToast("❌ Cuba lagi ya! Susun semula huruf.");
+            }
+        }
+
+        /* ===== RODA PUTAR (dipulihkan daripada fail lama) ===== */
+        const question1Data = [
+            { id: 1, word: "PETAI",   diftong: "AI", options: ["PETAI", "PETAU", "PETOI"],       correct: "PETAI",   audio: "assets/audio/petai.mp3",   image: "assets/images/petai.png" },
+            { id: 2, word: "SERAI",   diftong: "AI", options: ["SERAI", "SERAU", "SEROI"],       correct: "SERAI",   audio: "assets/audio/serai.mp3",   image: "assets/images/serai.png" },
+            { id: 3, word: "CAKOI",   diftong: "OI", options: ["CAKAI", "CAKAU", "CAKOI"],       correct: "CAKOI",   audio: "assets/audio/cakoi.mp3",   image: "assets/images/cakoi.png" },
+            { id: 4, word: "TAPAI",   diftong: "AI", options: ["TAPAI", "TAPAU", "TAPOI"],       correct: "TAPAI",   audio: "assets/audio/tapai.mp3",   image: "assets/images/tapai.png" },
+            { id: 5, word: "LIMAU",   diftong: "AU", options: ["LIMAI", "LIMAU", "LIMOI"],       correct: "LIMAU",   audio: "assets/audio/limau.mp3",   image: "assets/images/limau.png" },
+            { id: 6, word: "SEBARAU", diftong: "AU", options: ["SEBARAI", "SEBARAU", "SEBAROI"], correct: "SEBARAU", audio: "assets/audio/sebarau.mp3", image: "assets/images/sebarau.png" }
+        ];
+
+        const putarGameState = {
+            currentQuestionIndex: 0,
+            correctCount: 0,
+            isSpinning: false,
+            currentAudio: null,
+            rotation: 0,
+            spinTimer: null,
+            wheelSound: new Audio('assets/audio/wheel_spin.mp3')
+        };
+
+        function stopCurrentAudio() {
+            if (putarGameState.currentAudio) {
+                putarGameState.currentAudio.pause();
+                putarGameState.currentAudio.currentTime = 0;
+                putarGameState.currentAudio = null;
+            }
+        }
+
+        function stopWheelSound() {
+            try {
+                putarGameState.wheelSound.pause();
+                putarGameState.wheelSound.currentTime = 0;
+            } catch (e) { /* abaikan */ }
+        }
+
+        function openRodaPutar() {
+            stopCurrentAudio();
+            navigateTo('page-putar');
+        }
+
+        function closeRodaPutar() {
+            stopCurrentAudio();
+            stopWheelSound();
+            if (putarGameState.spinTimer) {
+                clearTimeout(putarGameState.spinTimer);
+                putarGameState.spinTimer = null;
+            }
+            putarGameState.isSpinning = false;
+            const btnSpin = document.getElementById('btn-spin-action');
+            if (btnSpin) btnSpin.disabled = false;
+            navigateTo('page-dashboard');
+        }
+
+        function mulakanPutarRoda() {
+            if (putarGameState.isSpinning) return;
+            putarGameState.isSpinning = true;
+            stopCurrentAudio();
+
+            // Kesan bunyi sepanjang roda berputar (jika fail ada)
+            putarGameState.wheelSound.loop = true;
+            putarGameState.wheelSound.currentTime = 0;
+            putarGameState.wheelSound.play().catch(() => {
+                console.warn("Audio kesan putaran tidak ditemui: assets/audio/wheel_spin.mp3");
+            });
+
+            const wheel = document.getElementById('putar-wheel');
+            const btnSpin = document.getElementById('btn-spin-action');
+            if (btnSpin) btnSpin.disabled = true;
+
+            const targetIdx = putarGameState.currentQuestionIndex % question1Data.length;
+            document.getElementById('spin-q-num').innerText = targetIdx + 1;
+
+            // Roda berputar terkumpul supaya tidak berpatah balik; tengah sektor sasaran berhenti tepat di penunjuk atas
+            const sectorCenter = targetIdx * 60 + 30;
+            const desiredMod = (360 - sectorCenter) % 360;
+            const currentMod = putarGameState.rotation % 360;
+            const delta = (desiredMod - currentMod + 360) % 360;
+            putarGameState.rotation += 360 * 5 + delta;
+            wheel.style.transform = `rotate(${putarGameState.rotation}deg)`;
+
+            putarGameState.spinTimer = setTimeout(() => {
+                putarGameState.spinTimer = null;
+                stopWheelSound();
+                putarGameState.isSpinning = false;
+                if (btnSpin) btnSpin.disabled = false;
+
+                // Misi harian m3: Putar Roda Putar Diftong
+                const m3 = appData.dailyMissions.find(m => m.id === 'm3');
+                if (m3 && !m3.completed) {
+                    m3.completed = true;
+                    saveState();
+                }
+
+                // Pengguna sudah meninggalkan halaman semasa roda berputar
+                if (document.getElementById('page-putar').classList.contains('hidden')) return;
+
+                document.getElementById('spin-wheel-card').classList.add('hidden');
+                document.getElementById('spin-challenge-card').classList.remove('hidden');
+
+                const q = question1Data[targetIdx];
+                document.getElementById('challenge-title-label').innerText = `Soalan Q${targetIdx + 1}`;
+
+                const oldBanner = document.getElementById('wrong-feedback-banner');
+                if (oldBanner) oldBanner.remove();
+
+                const optionsContainer = document.getElementById('spin-options-container');
+                optionsContainer.innerHTML = '';
+                [...q.options].sort(() => Math.random() - 0.5).forEach(opt => {
+                    const b = document.createElement('button');
+                    b.className = "bg-yellow-50 hover:bg-yellow-100 text-gray-900 font-bold p-4 rounded-2xl border-2 border-yellow-400 shadow-sm btn-bounce text-base";
+                    b.innerText = opt;
+                    b.onclick = () => semakJawapanPutar(opt, targetIdx);
+                    optionsContainer.appendChild(b);
+                });
+
+                mainkanAudioPutar(targetIdx);
+            }, 4200);
+        }
+
+        function mainkanAudioPutar(qIdx) {
+            stopCurrentAudio();
+            const idx = (typeof qIdx === 'number') ? qIdx : (putarGameState.currentQuestionIndex % question1Data.length);
+            const q = question1Data[idx];
+            const audioEl = document.getElementById('spin-audio-player');
+            const speaker = document.getElementById('speaker-icon');
+
+            if (speaker) {
+                speaker.classList.add('animate-ping');
+                setTimeout(() => speaker.classList.remove('animate-ping'), 1000);
+            }
+
+            audioEl.src = q.audio;
+            putarGameState.currentAudio = audioEl;
+
+            audioEl.play().catch(err => {
+                if (err && err.name === 'AbortError') return;
+                if (err && err.name === 'NotAllowedError') {
+                    showToast('🔊 Tekan butang "Dengar Sekali Lagi" untuk memainkan audio.');
+                } else {
+                    console.warn("Fail audio tidak ditemui:", q.audio);
+                    showToast(`⚠️ Fail audio tidak ditemui: ${q.audio}`);
+                }
+            });
+        }
+
+        function semakJawapanPutar(pilihan, qIdx) {
+            stopCurrentAudio();
+            const q = question1Data[qIdx];
+            const isCorrect = pilihan.toUpperCase() === q.correct.toUpperCase();
+
+            const existingBanner = document.getElementById('wrong-feedback-banner');
+            if (existingBanner) existingBanner.remove();
+
+            if (isCorrect) {
+                document.getElementById('spin-challenge-card').classList.add('hidden');
+                document.getElementById('spin-result-card').classList.remove('hidden');
+
+                document.getElementById('reveal-word').innerText = q.correct.toUpperCase();
+                document.getElementById('reveal-diftong').innerText = `Diftong: ${q.diftong}`;
+                document.getElementById('reveal-image').src = q.image;
+
+                putarGameState.correctCount++;
+                document.getElementById('spin-score-count').innerText = putarGameState.correctCount;
+
+                // Ganjaran (tanpa bunyi tambahan supaya audio tidak bertindih)
+                appData.coins += 10;
+                addXP(25);
+                triggerConfetti();
+
+                const banner = document.getElementById('result-feedback-banner');
+                banner.className = "p-3 rounded-2xl font-bold text-lg bg-green-100 text-green-800 border-2 border-green-400";
+                banner.innerText = "Tahniah! Anda betul!";
+
+                const correctAudio = new Audio('assets/audio/tahniah_anda_betul.mp3');
+                correctAudio.loop = false;
+                putarGameState.currentAudio = correctAudio;
+                correctAudio.play().catch(() => console.warn("Audio tidak ditemui atau disekat: assets/audio/tahniah_anda_betul.mp3"));
+            } else {
+                const challengeCard = document.getElementById('spin-challenge-card');
+                challengeCard.classList.add('animate-shake');
+                setTimeout(() => challengeCard.classList.remove('animate-shake'), 400);
+
+                const wrongAudio = new Audio('assets/audio/cuba_lagi.mp3');
+                wrongAudio.loop = false;
+                putarGameState.currentAudio = wrongAudio;
+                wrongAudio.play().catch(() => console.warn("Audio tidak ditemui atau disekat: assets/audio/cuba_lagi.mp3"));
+
+                const banner = document.createElement('div');
+                banner.id = "wrong-feedback-banner";
+                banner.className = "bg-red-100 border-2 border-red-400 text-red-700 font-bold p-3 rounded-2xl text-center mb-3";
+                banner.innerText = "Jom cuba lagi!";
+                const container = document.getElementById('spin-options-container');
+                container.parentNode.insertBefore(banner, container);
+            }
+        }
+
+        function lanjutkanPutarSeterusnya() {
+            stopCurrentAudio();
+            document.getElementById('spin-result-card').classList.add('hidden');
+            putarGameState.currentQuestionIndex++;
+
+            if (putarGameState.currentQuestionIndex >= question1Data.length) {
+                document.getElementById('peti-harta-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('spin-wheel-card').classList.remove('hidden');
+                document.getElementById('spin-q-num').innerText = (putarGameState.currentQuestionIndex % question1Data.length) + 1;
+            }
+        }
+
+        function tutupPetiHarta() {
+            stopCurrentAudio();
+            appData.coins += 50;
+            saveState();
+            triggerConfetti();
+            document.getElementById('peti-harta-modal').classList.add('hidden');
+            putarGameState.correctCount = 0;
+            putarGameState.currentQuestionIndex = 0;
+            document.getElementById('spin-score-count').innerText = 0;
+            document.getElementById('spin-q-num').innerText = 1;
+            document.getElementById('spin-wheel-card').classList.remove('hidden');
+            showToast("🎁 Tahniah! Anda menerima +50 Syiling!");
+        }
+
+        /* ===== RUANG TRIALOGIKAL (dipulihkan daripada fail lama) ===== */
+        function buatKadPostTrialog(penulis, diftong, teks) {
+            const div = document.createElement('div');
+            div.className = "bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-200 space-y-2";
+
+            const head = document.createElement('div');
+            head.className = "flex items-center justify-between text-xs font-bold text-emerald-800";
+            const who = document.createElement('span');
+            who.textContent = `👤 ${penulis}`;
+            const tag = document.createElement('span');
+            tag.className = "bg-emerald-200 px-2 py-0.5 rounded";
+            tag.textContent = `Diftong: ${diftong}`;
+            head.appendChild(who);
+            head.appendChild(tag);
+
+            const p = document.createElement('p');
+            p.className = "text-sm font-medium text-gray-800";
+            p.textContent = teks;
+
+            div.appendChild(head);
+            div.appendChild(p);
+            return div;
+        }
+
+        function renderTrialogPosts() {
+            const list = document.getElementById('trialog-posts-list');
+            if (list.children.length === 0) {
+                list.appendChild(buatKadPostTrialog('Cikgu Hairan', 'AI', 'Pak Cik Ali memelihara kerbau dan menanam serai di belakang rumah.'));
+            }
+        }
+
+        function openTrialogikal() {
+            renderTrialogPosts();
+            navigateTo('page-trialogikal');
+        }
+
+        function hantarTrialog() {
+            const text = document.getElementById('trialog-text').value.trim();
+            const diftong = document.getElementById('trialog-diftong').value.toUpperCase();
+            if (!text) {
+                showToast("✏️ Sila tulis ayat anda terlebih dahulu.");
+                return;
+            }
+            renderTrialogPosts();
+            document.getElementById('trialog-posts-list').prepend(buatKadPostTrialog('Anda', diftong, text));
+            document.getElementById('trialog-text').value = '';
+            addXP(15);
+            triggerConfetti();
+            showToast("✅ Ayat anda telah ditambah ke Papan Pengetahuan Bersama (+15 XP).");
+        }
+
+        /* ===== NOTA & SEBUTAN DIFTONG ===== */
+        const NOTA_DATA = [
+            {
+                diftong: 'ai', title: 'Diftong AI',
+                desc: 'Gabungan bunyi vokal /a/ dengan /i/ dalam satu suku kata.',
+                contoh: ['Balai', 'Petai', 'Serai', 'Pantai', 'Tupai', 'Kedai', 'Sungai', 'Pandai', 'Rantai', 'Damai', 'Lantai'],
+                border: 'border-emerald-400', soft: 'bg-emerald-50', badge: 'bg-emerald-100 text-emerald-600 border-emerald-300',
+                title_c: 'text-emerald-800', btn: 'bg-emerald-500 hover:bg-emerald-600', spk: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+            },
+            {
+                diftong: 'au', title: 'Diftong AU',
+                desc: 'Gabungan bunyi vokal /a/ dengan /u/ dalam satu suku kata.',
+                contoh: ['Kerbau', 'Harimau', 'Pulau', 'Surau', 'Limau', 'Pisau', 'Hijau', 'Danau', 'Silau', 'Kacau', 'Risau', 'Sebarau', 'Bangau'],
+                border: 'border-amber-400', soft: 'bg-amber-50', badge: 'bg-amber-100 text-amber-600 border-amber-300',
+                title_c: 'text-amber-800', btn: 'bg-amber-500 hover:bg-amber-600', spk: 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+            },
+            {
+                diftong: 'oi', title: 'Diftong OI',
+                desc: 'Gabungan bunyi vokal /o/ dengan /i/ dalam satu suku kata.',
+                contoh: ['Amboi', 'Kaloi', 'Koboi', 'Dodoi', 'Sepoi', 'Konvoi', 'Adoi'],
+                border: 'border-pink-400', soft: 'bg-pink-50', badge: 'bg-pink-100 text-pink-600 border-pink-300',
+                title_c: 'text-pink-800', btn: 'bg-pink-500 hover:bg-pink-600', spk: 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+            }
+        ];
+
+        // Setiap perkataan dimainkan daripada assets/audio/<perkataan huruf kecil>.mp3
+        const NOTA_AUDIO_DIR = 'assets/audio/';
+
+        let notaCurrentKey = null;
+        let notaCurrentBtn = null;
+
+        function notaAudioKey(name) { return 'nota_' + name; }
+
+        function stopNotaAudio() {
+            if (notaCurrentKey && audioInstances[notaCurrentKey]) {
+                audioInstances[notaCurrentKey].pause();
+                audioInstances[notaCurrentKey].currentTime = 0;
+            }
+            notaCurrentKey = null;
+        }
+
+        // Audio asas (ai/au/oi) dan audio perkataan dimainkan melalui getAudio() asal projek
+        function playNotaAudio(name, btn) {
+            const key = notaAudioKey(name);
+            const fileName = name + '.mp3';
+            try {
+                if (!audioFiles[key]) audioFiles[key] = NOTA_AUDIO_DIR + fileName;
+
+                // Elak audio bertindih: hentikan audio nota sebelumnya dan audio pengenalan/sambutan/perkataan modul
+                stopNotaAudio();
+                ['selamatDatang', 'pengenalan'].forEach(k => { if (audioInstances[k]) audioInstances[k].pause(); });
+                if (currentWordAudioKey && audioInstances[currentWordAudioKey]) audioInstances[currentWordAudioKey].pause();
+
+                const snd = getAudio(key);
+                notaCurrentKey = key;
+                snd.currentTime = 0;
+
+                if (btn) {
+                    btn.classList.remove('nota-playing');
+                    void btn.offsetWidth;
+                    btn.classList.add('nota-playing');
+                }
+
+                snd.play().catch(err => {
+                    if (err && err.name === 'AbortError') return;
+                    if (err && err.name === 'NotAllowedError') {
+                        showToast('🔊 Tekan butang audio sekali lagi ya!');
+                    } else {
+                        showToast(`🔇 Audio '${fileName}' belum ada lagi. Jom cuba perkataan lain!`);
+                    }
+                });
+            } catch (err) {
+                console.log("Nota audio error:", err);
+                showToast('🔇 Audio belum dapat dimainkan. Jom cuba lagi!');
+            }
+        }
+
+        function renderNotaCards() {
+            const container = document.getElementById('nota-diftong-container');
+            container.innerHTML = '';
+
+            NOTA_DATA.forEach((d, i) => {
+                const card = document.createElement('div');
+                card.className = `nota-card nota-reveal nota-pre ${d.soft} border-4 ${d.border} rounded-3xl p-5 shadow-lg flex flex-col space-y-4`;
+                card.style.transitionDelay = (i * 120) + 'ms';
+
+                const head = document.createElement('div');
+                head.className = 'flex items-center gap-3';
+                const mark = document.createElement('div');
+                mark.className = `w-14 h-14 ${d.badge} border-2 rounded-2xl flex items-center justify-center text-3xl font-extrabold shrink-0`;
+                mark.textContent = d.diftong;
+                const h3 = document.createElement('h3');
+                h3.className = `text-2xl font-extrabold ${d.title_c}`;
+                h3.textContent = d.title;
+                head.appendChild(mark);
+                head.appendChild(h3);
+
+                const desc = document.createElement('p');
+                desc.className = 'text-sm sm:text-base text-gray-700 font-medium leading-relaxed';
+                desc.textContent = d.desc;
+
+                const baseBtn = document.createElement('button');
+                baseBtn.className = `${d.btn} text-white font-extrabold text-base px-4 py-3 rounded-2xl shadow-md btn-bounce flex items-center justify-center gap-2`;
+                baseBtn.setAttribute('aria-label', `Dengar bunyi ${d.diftong.toUpperCase()}`);
+                baseBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span></span>';
+                baseBtn.querySelector('span').textContent = `Bunyi ${d.diftong.toUpperCase()}`;
+                baseBtn.onclick = () => playNotaAudio(d.diftong, baseBtn);
+
+                const list = document.createElement('div');
+                list.className = 'space-y-2';
+                d.contoh.forEach(word => {
+                    const row = document.createElement('div');
+                    row.className = 'bg-white rounded-2xl border-2 border-gray-100 px-4 py-2 flex items-center justify-between gap-3 shadow-sm';
+                    const w = document.createElement('span');
+                    w.className = 'text-xl font-extrabold text-gray-800';
+                    w.textContent = word;
+                    row.appendChild(w);
+
+                    const lower = word.toLowerCase();
+                    const spk = document.createElement('button');
+                    spk.className = `${d.spk} w-11 h-11 rounded-full flex items-center justify-center text-lg transition btn-bounce shrink-0`;
+                    spk.setAttribute('aria-label', `Dengar sebutan ${word}`);
+                    spk.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                    spk.onclick = () => playNotaAudio(lower, spk);
+                    row.appendChild(spk);
+                    list.appendChild(row);
+                });
+
+                card.appendChild(head);
+                card.appendChild(desc);
+                card.appendChild(baseBtn);
+                card.appendChild(list);
+                container.appendChild(card);
+            });
+        }
+
+        // Animasi kemunculan apabila ditatal (dengan jalan keluar jika pelayar tidak menyokong)
+        function initNotaReveal() {
+            const targets = Array.from(document.querySelectorAll('#page-nota .nota-reveal'));
+            const showAll = () => targets.forEach(el => el.classList.remove('nota-pre'));
+            if (!('IntersectionObserver' in window)) { showAll(); return; }
+            targets.filter(el => el.id === 'nota-semangat').forEach(el => el.classList.add('nota-pre'));
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(en => {
+                    if (en.isIntersecting) {
+                        en.target.classList.remove('nota-pre');
+                        io.unobserve(en.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            targets.forEach(el => io.observe(el));
+            setTimeout(showAll, 3000);
+        }
+
+        function openNota() {
+            renderNotaCards();
+            document.getElementById('nota-student-name').value = appData.studentName;
+            navigateTo('page-nota');
+            initNotaReveal();
+        }
+
+        function tutupNota() {
+            stopNotaAudio();
+            navigateTo('page-dashboard');
+        }
+
+        // Nama murid guna mekanisme sedia ada (appData.studentName + saveState)
+        function simpanNamaNota() {
+            const nameVal = document.getElementById('nota-student-name').value.trim();
+            if (!nameVal) {
+                showToast('✏️ Sila tulis nama kamu dahulu ya!');
+                return;
+            }
+            appData.studentName = nameVal;
+            saveState();
+            showToast(`✅ Hai, ${nameVal}! Nama kamu telah disimpan.`);
+        }
+
+        function openAvatarCustomizer() {
+            renderShop();
+            navigateTo('page-shop');
+        }
+
+        function renderShop() {
+            const grid = document.getElementById('shop-items-grid');
+            grid.innerHTML = '';
+
+            SHOP_ITEMS.forEach(item => {
+                const isOwned = appData.inventory.includes(item.id);
+                const isEquipped = appData.equippedHat === item.id;
+                const card = document.createElement('div');
+
+                card.className = "bg-pink-50 p-4 rounded-2xl border-2 border-pink-200 text-center flex flex-col justify-between space-y-2";
+                
+                let btnHtml = '';
+                if (isEquipped) {
+                    btnHtml = `<span class="bg-brandPink text-white text-xs font-bold py-1 px-3 rounded-full">Sedang Dipakai</span>`;
+                } else if (isOwned) {
+                    btnHtml = `<button onclick="equipHat('${item.id}')" class="bg-brandPurple text-white text-xs font-bold py-1.5 px-3 rounded-xl hover:bg-purple-800 transition">Pakai</button>`;
+                } else {
+                    btnHtml = `<button onclick="buyHat('${item.id}', ${item.price})" class="bg-amber-500 text-white text-xs font-bold py-1.5 px-3 rounded-xl hover:bg-amber-600 transition">Beli (${item.price} 🪙)</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="text-4xl my-1">${item.icon}</div>
+                    <div class="font-bold text-gray-800 text-sm">${item.name}</div>
+                    <div>${btnHtml}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function buyHat(hatId, price) {
+            if (appData.coins >= price) {
+                appData.coins -= price;
+                appData.inventory.push(hatId);
+                appData.equippedHat = hatId;
+                saveState();
+                renderShop();
+                showToast("🎉 Aksesori berjaya dibeli dan dipakai!");
+            } else {
+                showToast("❌ Syiling kamu tidak mencukupi!");
+            }
+        }
+
+        function equipHat(hatId) {
+            appData.equippedHat = hatId;
+            saveState();
+            renderShop();
+            showToast("✨ Aksesori ditukar!");
+        }
+
+        function openMissionsModal() {
+            renderMissions();
+            navigateTo('page-missions');
+        }
+
+        function renderMissions() {
+            const container = document.getElementById('missions-list-container');
+            container.innerHTML = '';
+
+            appData.dailyMissions.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 flex items-center justify-between gap-4";
+
+                let statusBadge = '<span class="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">Belum Bermula</span>';
+                if (m.claimed) {
+                    statusBadge = '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Selesai & Dituntut</span>';
+                } else if (m.completed) {
+                    statusBadge = '<span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Sedia Dituntut</span>';
+                }
+
+                let btnHtml = '';
+                if (m.claimed) {
+                    btnHtml = '<button disabled class="bg-gray-300 text-gray-500 font-bold text-xs px-4 py-2 rounded-xl">Telah Dituntut</button>';
+                } else if (m.completed) {
+                    btnHtml = `<button onclick="claimMissionReward('${m.id}')" class="bg-brandGreen hover:bg-emerald-600 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition btn-bounce shadow">Tuntut (${m.reward} 🪙)</button>`;
+                } else {
+                    btnHtml = '<button disabled class="bg-gray-200 text-gray-400 font-bold text-xs px-4 py-2 rounded-xl">Belum Selesai</button>';
+                }
+
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="font-bold text-amber-900 text-base">${m.text}</div>
+                        <div class="flex items-center space-x-2">
+                            ${statusBadge}
+                            <span class="text-xs font-bold text-amber-700">+${m.reward} Syiling</span>
+                        </div>
+                    </div>
+                    <div>${btnHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function claimMissionReward(missionId) {
+            const m = appData.dailyMissions.find(x => x.id === missionId);
+            if (m && m.completed && !m.claimed) {
+                m.claimed = true;
+                addCoins(m.reward);
+                renderMissions();
+                showToast(`🎁 Ganjaran Misi +${m.reward} Syiling Dituntut!`);
+            }
+        }
+
+        function openCardCollection() {
+            renderCardCollection();
+            navigateTo('page-cards');
+        }
+
+        function renderCardCollection() {
+            const container = document.getElementById('card-collection-grid');
+            container.innerHTML = '';
+
+            ALL_COLLECTIBLE_CARDS.forEach(cardData => {
+                const isUnlocked = appData.cardCollection.includes(cardData.id);
+                const el = document.createElement('div');
+
+                if (isUnlocked) {
+                    el.className = "bg-gradient-to-b from-amber-50 to-orange-100 p-4 rounded-2xl border-2 border-amber-300 text-center shadow-md hover:scale-105 transition cursor-pointer btn-bounce";
+                    el.onclick = () => playWordAudio(cardData.id, cardData.word);
+                    el.innerHTML = `
+                        <div class="text-5xl my-2">${cardData.emoji}</div>
+                        <div class="font-extrabold text-amber-900 text-lg">${cardData.word}</div>
+                        <span class="inline-block bg-white text-amber-700 font-bold text-xs px-2.5 py-0.5 rounded-full border border-amber-200 mt-1">
+                            Diftong '${cardData.diftong}'
+                        </span>
+                    `;
+                } else {
+                    el.className = "bg-gray-100 p-4 rounded-2xl border-2 border-dashed border-gray-300 text-center opacity-60";
+                    el.innerHTML = `
+                        <div class="text-5xl my-2">🔒</div>
+                        <div class="font-bold text-gray-500 text-sm">Belum Diperolehi</div>
+                        <span class="text-xs text-gray-400">Selesaikan Modul '${cardData.diftong}'</span>
+                    `;
+                }
+                container.appendChild(el);
+            });
+        }
+
+        function openRankingModal() {
+            renderRanking();
+            navigateTo('page-ranking');
+        }
+
+        function renderRanking() {
+            const container = document.getElementById('ranking-table-body');
+            container.innerHTML = '';
+
+            const mockStudents = [
+                { name: "Ahmad Zaki", level: 3, xp: 280 },
+                { name: "Siti Nurhaliza", level: 2, xp: 190 },
+                { name: "Muthu Pillai", level: 2, xp: 140 },
+                { name: appData.studentName, level: appData.level, xp: appData.xp, isCurrent: true }
+            ];
+
+            mockStudents.sort((a, b) => b.xp - a.xp);
+
+            mockStudents.forEach((st, idx) => {
+                const tr = document.createElement('tr');
+                if (st.isCurrent) {
+                    tr.className = "bg-purple-100 font-extrabold text-purple-900 border-l-4 border-purple-600";
+                } else {
+                    tr.className = "hover:bg-purple-50 text-gray-700";
+                }
+
+                let rankBadge = `${idx + 1}`;
+                if (idx === 0) rankBadge = '🥇 1';
+                if (idx === 1) rankBadge = '🥈 2';
+                if (idx === 2) rankBadge = '🥉 3';
+
+                tr.innerHTML = `
+                    <td class="p-3">${rankBadge}</td>
+                    <td class="p-3">${st.name} ${st.isCurrent ? '<span class="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full ml-1">(Kamu)</span>' : ''}</td>
+                    <td class="p-3">Tahap ${st.level}</td>
+                    <td class="p-3 text-purple-700 font-black">${st.xp} XP</td>
+                `;
+                container.appendChild(tr);
+            });
+        }
+
+        function openStudentProfile() {
+            renderStudentProfile();
+            navigateTo('page-profile');
+        }
+
+        function renderStudentProfile() {
+            document.getElementById('profile-student-name').innerText = appData.studentName;
+            document.getElementById('profile-level').innerText = appData.level;
+            document.getElementById('profile-coins').innerText = appData.coins;
+            document.getElementById('profile-xp').innerText = appData.xp;
+
+            const equipped = SHOP_ITEMS.find(i => i.id === appData.equippedHat);
+            const hatIcon = (equipped && equipped.id !== 'cap_none') ? equipped.icon : '';
+            document.getElementById('profile-accessory-display').innerText = hatIcon;
+
+            const grid = document.getElementById('profile-badges-grid');
+            grid.innerHTML = '';
+
+            ALL_BADGES.forEach(badge => {
+                const isUnlocked = appData.unlockedBadges.includes(badge.id);
+                const el = document.createElement('div');
+
+                if (isUnlocked) {
+                    el.className = "bg-pink-50 p-4 rounded-2xl border-2 border-pink-200 text-center space-y-1 shadow-sm";
+                    el.innerHTML = `
+                        <div class="text-4xl">${badge.icon}</div>
+                        <div class="font-extrabold text-pink-900 text-sm">${badge.title}</div>
+                        <div class="text-xs text-gray-500 font-medium">${badge.desc}</div>
+                    `;
+                } else {
+                    el.className = "bg-gray-100 p-4 rounded-2xl border-2 border-dashed border-gray-300 text-center space-y-1 opacity-50";
+                    el.innerHTML = `
+                        <div class="text-4xl">🔒</div>
+                        <div class="font-bold text-gray-500 text-sm">${badge.title}</div>
+                        <div class="text-xs text-gray-400">Terkunci</div>
+                    `;
+                }
+                grid.appendChild(el);
+            });
+        }
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHeaderUI();
+        });
+    </script>
+</body>
+</html>
